@@ -1,8 +1,6 @@
 "use client";
 
-import { useCallback } from 'react';
-import useEmblaCarousel from 'embla-carousel-react';
-import Autoplay from 'embla-carousel-autoplay';
+import { useState, useCallback } from 'react';
 import Image from 'next/image';
 
 const images = [
@@ -13,15 +11,19 @@ const images = [
 ];
 
 export const ToolsMarquee = () => {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay()]);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const scrollPrev = useCallback(() => {
-    emblaApi?.scrollPrev();
-  }, [emblaApi]);
+    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  }, []);
 
   const scrollNext = useCallback(() => {
-    emblaApi?.scrollNext();
-  }, [emblaApi]);
+    setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  }, []);
+
+  const goToSlide = (index: number) => {
+    setCurrentIndex(index);
+  };
 
   return (
     <div className="my-[12vh] border-b pb-24 border-white/5">
@@ -53,8 +55,8 @@ export const ToolsMarquee = () => {
 
           {/* Image Carousel - Larger */}
           <div className="lg:w-1/2 w-full relative">
-            <div className="overflow-hidden" ref={emblaRef}>
-              <div className="flex">
+            <div className="overflow-hidden">
+              <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
                 {images.map((img, index) => (
                   <div key={index} className="flex-[0_0_100%] min-w-0 relative h-80 md:h-96 lg:h-[28rem] rounded-xl overflow-hidden shadow-xl">
                     <Image
@@ -88,8 +90,8 @@ export const ToolsMarquee = () => {
               {images.map((_, index) => (
                 <button
                   key={index}
-                  onClick={() => emblaApi?.scrollTo(index)}
-                  className={`w-3 h-3 rounded-full ${emblaApi?.selectedScrollSnap() === index ? 'bg-primary' : 'bg-gray-400'}`}
+                  onClick={() => goToSlide(index)}
+                  className={`w-3 h-3 rounded-full ${currentIndex === index ? 'bg-primary' : 'bg-gray-400'}`}
                   aria-label={`Go to slide ${index + 1}`}
                 />
               ))}
@@ -101,7 +103,7 @@ export const ToolsMarquee = () => {
   );
 };
 
-// Updated icons with className prop
+// Icons tetap sama
 const ChevronLeftIcon = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M15 18l-6-6 6-6"/>
