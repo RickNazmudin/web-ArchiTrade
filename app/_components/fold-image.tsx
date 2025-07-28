@@ -39,7 +39,7 @@ export const ToolsMarquee = () => {
             </p>
             
             <div className="flex items-center justify-center lg:justify-start gap-6 mb-8">
-              <span className="text-gray-400 line-through text-2xl">Rp.200.000</span>
+              <span className="text-gray-400 line-through text-2xl">Rp.499.000</span>
               <span className="text-3xl md:text-4xl font-bold text-primary">Rp.99.000</span>
             </div>
             

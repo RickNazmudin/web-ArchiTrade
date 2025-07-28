@@ -69,23 +69,23 @@ export default function Page() {
               </div>
             </div>
 
-            <Card className="absolute hidden md:block left-20 top-52 rounded-2xl bg-zinc-800/80 p-4 backdrop-blur">
-              <div className="flex items-center gap-3">
-                <div className="rounded-full bg-zinc-700 p-2">
-                  <div className="h-4 w-4 rounded-full bg-[#4863A0]" />
+           <Card className="absolute hidden md:block left-5 lg:left-20 top-[30%] lg:top-52 rounded-2xl bg-zinc-800/80 p-3 lg:p-4 backdrop-blur w-auto max-w-[180px] lg:max-w-[220px]">
+              <div className="flex items-center gap-2 lg:gap-3">
+                <div className="rounded-full bg-zinc-700 p-1.5 lg:p-2">
+                  <div className="h-3 w-3 lg:h-4 lg:w-4 rounded-full bg-[#4863A0]" />
                 </div>
-                <span className="font-medium">
-                  Membangun Basis Anggota <span className=" text-appPrimary">Aktif</span>
+                <span className="font-medium text-xs lg:text-sm">
+                  Membangun Basis Anggota <span className="text-appPrimary">Aktif</span>
                 </span>
               </div>
             </Card>
 
-            <Card className="absolute hidden md:block right-20 top-80 rounded-2xl bg-zinc-800/80 p-4 backdrop-blur">
-              <div className="flex items-center gap-3">
-                <div className="rounded-full bg-zinc-700 p-2">
-                  <div className="h-4 w-4 rounded-full bg-[#4863A0]" />
+            <Card className="absolute hidden md:block right-5 lg:right-20 top-[55%] lg:top-80 rounded-2xl bg-zinc-800/80 p-3 lg:p-4 backdrop-blur w-auto max-w-[180px] lg:max-w-[220px]">
+              <div className="flex items-center gap-2 lg:gap-3">
+                <div className="rounded-full bg-zinc-700 p-1.5 lg:p-2">
+                  <div className="h-3 w-3 lg:h-4 lg:w-4 rounded-full bg-[#4863A0]" />
                 </div>
-                <span className="font-medium">Meningkatkan Keterlibatan Komunitas</span>
+                <span className="font-medium text-xs lg:text-sm">Meningkatkan Keterlibatan Komunitas</span>
               </div>
             </Card>
 
