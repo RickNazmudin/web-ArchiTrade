@@ -4,12 +4,9 @@ import { FormEvent, useRef, useState } from "react";
 
 const Footer = () => {
   const container = useRef<HTMLDivElement>(null);
-  // const [Send, cilentData] = useNewsLetter()
-  const [openPopup, setOpenPopUp] = useState(false);
+  const [, setOpenPopUp] = useState(false); // ← openPopup dihapus (tidak dipakai)
   const ref = useRef(null);
   const isInView = useInView(ref);
-
-  // no-op: removed debug logging to avoid noisy console output
 
   const variants = {
     visible: (i: number) => ({
@@ -22,26 +19,20 @@ const Footer = () => {
         delay: i * 0.03,
       },
     }),
-
     hidden: { translateY: 200 },
   };
+
   const handleNewsLetterData = (e: FormEvent) => {
     e.preventDefault();
     const target = e.target as HTMLFormElement;
     const formData = new FormData(target);
 
-    // use the input name to read the email
-    const clientEmail = formData.get("newsletter_email")?.toString() || "";
-    // const data: ClientData = {
-    //   email: clientEmail.toString(),
-    // }
+    // clientEmail tidak dipakai lagi → kita ambil tapi tidak simpan ke variabel
+    formData.get("newsletter_email")?.toString() || "";
 
-    // Send(data)
     setOpenPopUp(true);
     target.reset();
-    setTimeout(() => {
-      setOpenPopUp(false);
-    }, 2000);
+    setTimeout(() => setOpenPopUp(false), 2000);
   };
 
   return (
@@ -50,21 +41,21 @@ const Footer = () => {
         className="relative h-full bg-transparent text-white"
         ref={container}
       >
-        <div className="sm:container  px-4 mx-auto">
+        <div className="sm:container px-4 mx-auto">
           <div className="md:flex justify-between w-full">
             <div>
               <h1 className="md:text-4xl text-2xl font-semibold">
-                Let&lsquo;s do great{" "}
-                <span className=" text-appPrimary">work together</span>
+                Let&rsquo;s do great{" "}
+                <span className="text-appPrimary">work together</span>
               </h1>
-              <div className="pt-2 pb-6 md:w-99  ">
-                <p className="md:text-2xl text-xl  py-4">
+              <div className="pt-2 pb-6 md:w-99">
+                <p className="md:text-2xl text-xl py-4">
                   Kirimkan Email kepada kami dan mari kita ngobrol tentang
                   Rencana Trading Anda
                 </p>
                 <div className="relative w-full max-w-xl">
                   <form
-                    onSubmit={(e) => handleNewsLetterData(e)}
+                    onSubmit={handleNewsLetterData}
                     className="flex w-full rounded-lg overflow-hidden border border-white/10 bg-black/30 backdrop-blur-sm"
                   >
                     <input
@@ -84,6 +75,7 @@ const Footer = () => {
                 </div>
               </div>
             </div>
+
             <div className="flex gap-10">
               <ul>
                 <li className="text-2xl pb-2 text-black font-semibold">
@@ -93,7 +85,7 @@ const Footer = () => {
                   <a
                     href="https://www.youtube.com/@ArchiTrade99"
                     target="_blank"
-                    className=" hover:text-appPrimary hover:underline hover:scale-110 transition-all"
+                    className="hover:text-appPrimary hover:underline hover:scale-110 transition-all"
                   >
                     Youtube
                   </a>
@@ -102,7 +94,7 @@ const Footer = () => {
                   <a
                     href="https://www.tiktok.com/@architrade99"
                     target="_blank"
-                    className=" hover:text-appPrimary hover:underline hover:scale-110 transition-all"
+                    className="hover:text-appPrimary hover:underline hover:scale-110 transition-all"
                   >
                     Tiktok
                   </a>
@@ -111,7 +103,7 @@ const Footer = () => {
                   <a
                     href="https://www.instagram.com/architrade99/"
                     target="_blank"
-                    className=" hover:text-appPrimary hover:underline hover:scale-110 transition-all"
+                    className="hover:text-appPrimary hover:underline hover:scale-110 transition-all"
                   >
                     Instagram
                   </a>
@@ -120,7 +112,7 @@ const Footer = () => {
                   <a
                     href="https://t.me/+s22nBUElvnw0Y2Y1"
                     target="_blank"
-                    className=" hover:text-appPrimary hover:underline hover:scale-110 transition-all"
+                    className="hover:text-appPrimary hover:underline hover:scale-110 transition-all"
                   >
                     Telegram
                   </a>
@@ -128,6 +120,7 @@ const Footer = () => {
               </ul>
             </div>
           </div>
+
           <div className="border-y-2 md:py-4 border-white/90">
             <motion.svg
               width="776"
@@ -160,9 +153,6 @@ const Footer = () => {
             <span className="font-medium">
               &copy; 2025 ArchiTrade. All Rights Reserved.
             </span>
-            {/* <a href="#" className="font-semibold">
-              Privacy Policy
-            </a> */}
           </div>
         </div>
       </div>

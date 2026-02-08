@@ -1,7 +1,5 @@
-// app/contact/page.tsx
-"use client"; // Ditambahkan karena ada interaktivitas form (state, dll) di masa depan
+"use client";
 
-import Link from "next/link";
 import Header from "@/components/ui/header";
 import Footer from "../_components/footer";
 import { useState } from "react";
@@ -21,7 +19,6 @@ export default function ContactPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Nanti bisa integrasi dengan EmailJS, Formspree, atau API sendiri
     alert("Pesan Anda telah dikirim! Kami akan segera menghubungi Anda.");
     setFormData({ name: "", email: "", message: "" });
   };
@@ -31,11 +28,9 @@ export default function ContactPage() {
       <Header />
 
       <main className="relative pt-20 pb-24">
-        {/* Subtle gradient + grain overlay (sesuai layout global) */}
         <div className="absolute inset-0 bg-gradient-to-b from-zinc-950 via-black to-zinc-950 opacity-80 pointer-events-none" />
 
         <div className="relative mx-auto max-w-6xl px-6 lg:px-12">
-          {/* Header Section */}
           <section className="text-center mb-16">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white via-zinc-200 to-white">
               Hubungi Kami
@@ -46,7 +41,6 @@ export default function ContactPage() {
             </p>
           </section>
 
-          {/* Contact Info Cards */}
           <section className="grid md:grid-cols-3 gap-8 mb-20">
             {contactOptions.map((option, index) => (
               <div
@@ -72,7 +66,6 @@ export default function ContactPage() {
             ))}
           </section>
 
-          {/* Contact Form */}
           <section className="max-w-3xl mx-auto">
             <div className="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-8 lg:p-12 backdrop-blur-sm">
               <h2 className="text-3xl font-bold mb-8 text-center">

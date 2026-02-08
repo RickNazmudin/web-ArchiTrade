@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import CardScroll from "@/components/ui/scroll-element";
 import Link from "next/link";
 import { ToolsMarquee } from "./_components/fold-image";
@@ -7,6 +6,7 @@ import Footer from "./_components/footer";
 import { MarqueeDemo } from "./_components/marquee";
 import { TextRevealDemo } from "./_components/text-revel-demo";
 import dynamic from "next/dynamic";
+
 const HeroVideoDialogDemo = dynamic(
   () =>
     import("./_components/video-card").then((mod) => mod.HeroVideoDialogDemo),
@@ -16,6 +16,7 @@ const WorldMapDemo = dynamic(
   () => import("./_components/world-map-demo").then((mod) => mod.WorldMapDemo),
   { ssr: false },
 );
+
 import Image from "next/image";
 import Header from "@/components/ui/header";
 
