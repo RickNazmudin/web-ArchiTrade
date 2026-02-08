@@ -10,11 +10,11 @@ const ToolsMarqueeComponent = () => {
 
   const scrollPrev = useCallback(() => {
     setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  }, [images.length]);
+  }, []); // ← dependency array kosong, images.length dihapus
 
   const scrollNext = useCallback(() => {
     setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  }, [images.length]);
+  }, []); // ← dependency array kosong, images.length dihapus
 
   const goToSlide = (index: number) => {
     setCurrentIndex(index);

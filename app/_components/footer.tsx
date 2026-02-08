@@ -1,163 +1,86 @@
 "use client";
-import { motion, useInView } from "framer-motion";
-import { FormEvent, useRef, useState } from "react";
 
-const Footer = () => {
-  const container = useRef<HTMLDivElement>(null);
-  const [, setOpenPopUp] = useState(false); // ← openPopup dihapus (tidak dipakai)
-  const ref = useRef(null);
-  const isInView = useInView(ref);
+import React, { useState } from "react";
 
-  const variants = {
-    visible: (i: number) => ({
-      translateY: 0,
-      transition: {
-        type: "spring",
-        stiffness: 100,
-        damping: 12,
-        duration: 0.4,
-        delay: i * 0.03,
-      },
-    }),
-    hidden: { translateY: 200 },
-  };
+export default function Footer() {
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleNewsLetterData = (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const target = e.target as HTMLFormElement;
-    const formData = new FormData(target);
+    setLoading(true);
 
-    // clientEmail tidak dipakai lagi → kita ambil tapi tidak simpan ke variabel
-    formData.get("newsletter_email")?.toString() || "";
+    try {
+      const formData = new FormData();
+      formData.append("email", email);
+      formData.append("message", message);
 
-    setOpenPopUp(true);
-    target.reset();
-    setTimeout(() => setOpenPopUp(false), 2000);
+      await fetch("/api/contact", {
+        method: "POST",
+        body: formData,
+      });
+
+      setEmail("");
+      setMessage("");
+      alert("Pesan berhasil dikirim!");
+    } catch (error) {
+      console.error("Gagal kirim pesan:", error);
+      alert("Terjadi kesalahan saat mengirim pesan.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <>
-      <div
-        className="relative h-full bg-transparent text-white"
-        ref={container}
-      >
-        <div className="sm:container px-4 mx-auto">
-          <div className="md:flex justify-between w-full">
-            <div>
-              <h1 className="md:text-4xl text-2xl font-semibold">
-                Let&rsquo;s do great{" "}
-                <span className="text-appPrimary">work together</span>
-              </h1>
-              <div className="pt-2 pb-6 md:w-99">
-                <p className="md:text-2xl text-xl py-4">
-                  Kirimkan Email kepada kami dan mari kita ngobrol tentang
-                  Rencana Trading Anda
-                </p>
-                <div className="relative w-full max-w-xl">
-                  <form
-                    onSubmit={handleNewsLetterData}
-                    className="flex w-full rounded-lg overflow-hidden border border-white/10 bg-black/30 backdrop-blur-sm"
-                  >
-                    <input
-                      type="email"
-                      name="newsletter_email"
-                      className="flex-1 bg-transparent text-white placeholder:text-white/60 px-4 py-3 focus:outline-none"
-                      placeholder="Your Email *"
-                      required
-                    />
-                    <button
-                      type="submit"
-                      className="bg-appPrimary px-4 py-2 text-black font-semibold hover:brightness-95 transition"
-                    >
-                      Kirim
-                    </button>
-                  </form>
-                </div>
-              </div>
-            </div>
+    <footer className="bg-gray-900 text-white p-10">
+      <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
+        <div>
+          <h2 className="text-xl font-bold mb-2">ArchiTrade</h2>
+          <p className="text-gray-400">
+            Platform perdagangan arsitektur modern & terpercaya.
+          </p>
+        </div>
 
-            <div className="flex gap-10">
-              <ul>
-                <li className="text-2xl pb-2 text-black font-semibold">
-                  SOCIAL
-                </li>
-                <li className="text-xl font-medium">
-                  <a
-                    href="https://www.youtube.com/@ArchiTrade99"
-                    target="_blank"
-                    className="hover:text-appPrimary hover:underline hover:scale-110 transition-all"
-                  >
-                    Youtube
-                  </a>
-                </li>
-                <li className="text-xl font-medium">
-                  <a
-                    href="https://www.tiktok.com/@architrade99"
-                    target="_blank"
-                    className="hover:text-appPrimary hover:underline hover:scale-110 transition-all"
-                  >
-                    Tiktok
-                  </a>
-                </li>
-                <li className="text-xl font-medium">
-                  <a
-                    href="https://www.instagram.com/architrade99/"
-                    target="_blank"
-                    className="hover:text-appPrimary hover:underline hover:scale-110 transition-all"
-                  >
-                    Instagram
-                  </a>
-                </li>
-                <li className="text-xl font-medium">
-                  <a
-                    href="https://t.me/+s22nBUElvnw0Y2Y1"
-                    target="_blank"
-                    className="hover:text-appPrimary hover:underline hover:scale-110 transition-all"
-                  >
-                    Telegram
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
+        <div>
+          <h3 className="font-semibold mb-2">Kontak Kami</h3>
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <input
+              type="email"
+              placeholder="Email kamu"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full p-2 rounded text-black"
+            />
 
-          <div className="border-y-2 md:py-4 border-white/90">
-            <motion.svg
-              width="776"
-              ref={ref}
-              height="137"
-              viewBox="0 0 776 137"
-              fill="none"
-              className="sm:h-fit h-20 md:px-8 px-2 footer-logo w-full"
-              xmlns="http://www.w3.org/2000/svg"
-              initial="hidden"
-              animate={isInView ? "visible" : "hidden"}
+            <textarea
+              placeholder="Pesan kamu"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              required
+              className="w-full p-2 rounded text-black"
+            />
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
             >
-              <motion.text
-                x="50%"
-                y="50%"
-                dominantBaseline="middle"
-                textAnchor="middle"
-                fill="#4863A0"
-                fontSize="48"
-                fontFamily="Arial, sans-serif"
-                variants={variants}
-                className="text-appPrimary font-extrabold text-[100px]"
-              >
-                ArchiTrade
-              </motion.text>
-            </motion.svg>
-          </div>
+              {loading ? "Mengirim..." : "Kirim"}
+            </button>
+          </form>
+        </div>
 
-          <div className="flex md:flex-row flex-col-reverse gap-3 justify-between py-2">
-            <span className="font-medium">
-              &copy; 2025 ArchiTrade. All Rights Reserved.
-            </span>
-          </div>
+        <div>
+          <h3 className="font-semibold mb-2">Ikuti Kami</h3>
+          <p className="text-gray-400">Instagram • Facebook • LinkedIn</p>
         </div>
       </div>
-    </>
-  );
-};
 
-export default Footer;
+      <div className="text-center text-gray-500 mt-8">
+        © {new Date().getFullYear()} ArchiTrade. All rights reserved.
+      </div>
+    </footer>
+  );
+}

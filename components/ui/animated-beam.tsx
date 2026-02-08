@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 export interface AnimatedBeamProps {
   className?: string;
-  containerRef: RefObject<HTMLElement | null>; // Container ref
+  containerRef: RefObject<HTMLElement | null>;
   fromRef: RefObject<HTMLElement | null>;
   toRef: RefObject<HTMLElement | null>;
   curvature?: number;
@@ -31,7 +31,7 @@ const AnimatedBeamComponent: React.FC<AnimatedBeamProps> = ({
   fromRef,
   toRef,
   curvature = 0,
-  reverse = false, // Include the reverse prop
+  reverse = false,
   duration = Math.random() * 3 + 4,
   delay = 0,
   pathColor = "gray",
@@ -48,7 +48,6 @@ const AnimatedBeamComponent: React.FC<AnimatedBeamProps> = ({
   const [pathD, setPathD] = useState("");
   const [svgDimensions, setSvgDimensions] = useState({ width: 0, height: 0 });
 
-  // Calculate the gradient coordinates based on the reverse prop
   const gradientCoordinates = reverse
     ? {
         x1: ["90%", "-10%"],
@@ -84,30 +83,21 @@ const AnimatedBeamComponent: React.FC<AnimatedBeamProps> = ({
           rectB.top - containerRect.top + rectB.height / 2 + endYOffset;
 
         const controlY = startY - curvature;
-        const d = `M ${startX},${startY} Q ${
-          (startX + endX) / 2
-        },${controlY} ${endX},${endY}`;
+        const d = `M ${startX},${startY} Q ${(startX + endX) / 2},${controlY} ${endX},${endY}`;
         setPathD(d);
       }
     };
 
-    // Initialize ResizeObserver
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const _entry of entries) {
-        // ← tambah underscore
-        updatePath();
-      }
+    const resizeObserver = new ResizeObserver(() => {
+      updatePath(); // ← hapus parameter _entry, langsung panggil fungsi
     });
 
-    // Observe the container element
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current);
     }
 
-    // Call the updatePath initially to set the initial path
     updatePath();
 
-    // Clean up the observer on component unmount
     return () => {
       resizeObserver.disconnect();
     };
@@ -152,13 +142,8 @@ const AnimatedBeamComponent: React.FC<AnimatedBeamProps> = ({
         <motion.linearGradient
           className="transform-gpu"
           id={id}
-          gradientUnits={"userSpaceOnUse"}
-          initial={{
-            x1: "0%",
-            x2: "0%",
-            y1: "0%",
-            y2: "0%",
-          }}
+          gradientUnits="userSpaceOnUse"
+          initial={{ x1: "0%", x2: "0%", y1: "0%", y2: "0%" }}
           animate={{
             x1: gradientCoordinates.x1,
             x2: gradientCoordinates.x2,
@@ -168,7 +153,7 @@ const AnimatedBeamComponent: React.FC<AnimatedBeamProps> = ({
           transition={{
             delay,
             duration,
-            ease: [0.16, 1, 0.3, 1], // https://easings.net/#easeOutExpo
+            ease: [0.16, 1, 0.3, 1],
             repeat: Infinity,
             repeatDelay: 0,
           }}
