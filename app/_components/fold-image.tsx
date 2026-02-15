@@ -37,10 +37,10 @@ const ToolsMarqueeComponent = () => {
 
             <div className="flex items-center justify-center lg:justify-start gap-6 mb-8">
               <span className="text-gray-400 line-through text-2xl">
-                Rp.1.499.000
+                Rp.499.000
               </span>
               <span className="text-3xl md:text-4xl font-bold text-primary">
-                Rp.499.000
+                Rp.99.000
               </span>
             </div>
 

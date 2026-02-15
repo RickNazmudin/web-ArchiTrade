@@ -63,10 +63,10 @@ export default function ServicesPage() {
               <div className="flex flex-wrap items-baseline gap-5 my-6">
                 <div className="flex items-baseline gap-3">
                   <span className="text-zinc-600 line-through text-2xl sm:text-3xl">
-                    Rp.1.499.000
+                    Rp.499.000
                   </span>
                   <span className="text-4xl sm:text-5xl font-extrabold text-appPrimary">
-                    Rp.499.000
+                    Rp.99.000
                   </span>
                 </div>
                 <span className="px-4 py-1.5 bg-zinc-800/60 rounded-full text-sm font-medium text-zinc-300">
