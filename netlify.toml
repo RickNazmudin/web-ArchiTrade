@@ -1,0 +1,10 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  # Beritahu Netlify untuk mengabaikan kunci publik dari scanning karena memang harus ada di client-side
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,NEXT_PUBLIC_APP_URL"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
