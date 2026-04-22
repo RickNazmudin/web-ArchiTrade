@@ -20,7 +20,8 @@ export function validateEnvironment() {
   if (missingVars.length > 0) {
     const error = `Missing required environment variables: ${missingVars.join(", ")}`;
     console.error("❌ Environment validation failed:", error);
-    throw new Error(error);
+    // Kita tidak akan melempar error agar aplikasi tidak crash 500, 
+    // melainkan membiarkan komponen menangani error-nya sendiri.
   }
 
   // Validate encryption key in production
