@@ -93,7 +93,7 @@ const ReviewCard = ({
           </span>
         )}
       </div>
-      <blockquote className="mt-2 text-sm flex-1">"{body}"</blockquote>
+      <blockquote className="mt-2 text-sm flex-1">&quot;{body}&quot;</blockquote>
       <div className="mt-2 pt-2 text-right">
         <span className="text-[10px] text-appPrimary/60">🤖 EA ArchiTrade</span>
       </div>
