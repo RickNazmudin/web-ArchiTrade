@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    qualities: [75, 85],
     // Use remotePatterns instead of the deprecated `domains` option.
     // This allows more granular control (protocol, hostname and pathname).
     remotePatterns: [
@@ -24,14 +23,6 @@ const nextConfig = {
         pathname: "/**",
       },
     ],
-  },
-  eslint: {
-    // Menghindari build gagal karena error lint
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    // Menghindari build gagal karena error type
-    ignoreBuildErrors: true,
   },
 
   // ✅ Security Headers
