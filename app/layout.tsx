@@ -32,7 +32,7 @@ export default function RootLayout({
         <div className="grain"></div>
         <div className="flex flex-col min-h-screen">
           <main className="flex-1">{children}</main>
-          {/* <Footer /> */}
+          <Footer />
         </div>
         <Toaster
           position="top-right"

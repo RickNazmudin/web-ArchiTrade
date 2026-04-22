@@ -57,10 +57,7 @@ export async function POST(request: NextRequest) {
     // ✅ Clear auth cookies
     response.cookies.delete("auth_token");
 
-    return NextResponse.json({
-      success: true,
-      message: MESSAGES.AUTH.LOGOUT_SUCCESS,
-    });
+    return response;
   } catch (error: any) {
     console.error("[API] Logout exception:", error);
     return NextResponse.json(

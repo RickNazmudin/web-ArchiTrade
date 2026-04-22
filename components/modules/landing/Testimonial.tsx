@@ -101,7 +101,7 @@ const ReviewCard = ({
   );
 };
 
-export function Testimonial() {
+export default function Testimonial() {
   return (
     <div className="relative flex h-[550px] w-full flex-row items-center justify-center overflow-hidden rounded-lg border bg-black md:shadow-xl">
       {/* Gradient overlay atas dan bawah */}

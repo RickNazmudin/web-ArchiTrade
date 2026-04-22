@@ -63,8 +63,7 @@ const nextConfig = {
           // CSP Header - Restrict script sources
           {
             key: "Content-Security-Policy",
-            value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://noemsryexrlesndgirym.supabase.co https://api.vercel.com;",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co https://api.vercel.com https://open.er-api.com;",
           },
           // Strict Transport Security
           {
@@ -78,18 +77,7 @@ const nextConfig = {
 
   // ✅ Redirect HTTP to HTTPS in production
   async redirects() {
-    if (process.env.NODE_ENV !== "production") {
-      return [];
-    }
-
-    return [
-      {
-        source: "/:path*",
-        destination: "https://:host/:path*",
-        permanent: true,
-        basePath: false,
-      },
-    ];
+    return [];
   },
 };
 

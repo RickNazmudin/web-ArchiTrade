@@ -4,6 +4,7 @@
  */
 
 import { createServerClient } from "@supabase/ssr";
+import { createSupabaseAdmin } from "@/lib/supabase/server";
 import { NextResponse, type NextRequest } from "next/server";
 import { VALIDATION, MESSAGES, USER_ROLES } from "@/lib/constants";
 import {
@@ -149,8 +150,13 @@ export async function POST(request: NextRequest) {
 
     if (profileError) {
       console.error("[API] Profile creation error:", profileError);
-      // Cleanup: delete user if profile creation failed
-      await supabase.auth.admin.deleteUser(data.user.id);
+      // ✅ Cleanup: Delete from Auth if Profile creation failed
+      const adminClient = createSupabaseAdmin();
+      if (adminClient) {
+        await adminClient.auth.admin.deleteUser(data.user.id);
+      } else {
+        console.warn("Could not cleanup user: admin client not available");
+      }
       return NextResponse.json(
         { error: MESSAGES.ERROR.SAVE_FAILED },
         { status: 500 },

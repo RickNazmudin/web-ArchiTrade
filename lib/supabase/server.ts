@@ -2,33 +2,49 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 export const createSupabaseServer = async () => {
-  const cookieStore = await cookies();
-
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error("Missing Supabase environment variables");
+    throw new Error("Missing Supabase environment variables. Please check your .env file.");
   }
 
-  return createServerClient(
-    supabaseUrl,
-    supabaseAnonKey,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options),
-            );
-          } catch {
-            // The `setAll` method was called from a Server Component.
-          }
-        },
+  const cookieStore = await cookies();
+  return createServerClient(supabaseUrl, supabaseAnonKey, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(cookiesToSet) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options),
+          );
+        } catch {
+          // Server Component fetch
+        }
       },
     },
-  );
+  });
+};
+
+/**
+ * Administrative Supabase client (Service Role)
+ * WARNING: Only use this in secure server-side environments!
+ */
+export const createSupabaseAdmin = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    console.warn("Missing Supabase admin environment variables. Admin tasks will fail.");
+    return null;
+  }
+
+  return createServerClient(supabaseUrl, serviceRoleKey, {
+    cookies: {
+      getAll() { return []; },
+      setAll() { },
+    },
+  });
 };
