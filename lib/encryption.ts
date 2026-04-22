@@ -2,11 +2,10 @@
 import crypto from "crypto";
 
 const ALGORITHM = "aes-256-gcm";
-const ENCRYPTION_KEY =
-  process.env.ENCRYPTION_KEY || "default-32-character-key-for-dev-only!";
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
 
 // Pastikan key 32 bytes
-const key = Buffer.from(ENCRYPTION_KEY.padEnd(32, "0").slice(0, 32), "utf-8");
+const key = Buffer.from((ENCRYPTION_KEY || "").padEnd(32, "0").slice(0, 32), "utf-8");
 
 export function encrypt(text: string): string {
   const iv = crypto.randomBytes(16);

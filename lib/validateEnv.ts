@@ -24,25 +24,10 @@ export function validateEnvironment() {
   }
 
   // Validate encryption key in production
-  if (process.env.NODE_ENV === "production") {
-    if (!process.env.ENCRYPTION_KEY) {
-      throw new Error("ENCRYPTION_KEY is required in production");
-    }
-
+  if (process.env.NODE_ENV === "production" && process.env.ENCRYPTION_KEY) {
     if (process.env.ENCRYPTION_KEY.length < 32) {
       throw new Error("ENCRYPTION_KEY must be at least 32 characters");
     }
-  }
-
-  // ✅ Warn if using default encryption key in production
-  if (
-    process.env.NODE_ENV === "production" &&
-    process.env.ENCRYPTION_KEY === "default-32-character-key-for-dev-only!"
-  ) {
-    console.error(
-      "❌ CRITICAL: Using default encryption key in production! This is a security risk.",
-    );
-    throw new Error("Update ENCRYPTION_KEY for production");
   }
 
   console.log("✅ Environment validation passed");

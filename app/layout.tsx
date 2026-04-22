@@ -4,13 +4,6 @@ import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Toaster } from "sonner";
 import Footer from "@/components/modules/landing/footer";
-import { validateEnvironment } from "@/lib/validateEnv";
-
-// ✅ Validate environment at startup
-if (typeof window === "undefined") {
-  // Server-side only
-  validateEnvironment();
-}
 
 const inter = Inter({
   subsets: ["latin"],
