@@ -19,65 +19,104 @@ export default function Page() {
   return (
     <div className="relative w-full bg-black">
       <Header />
-      
+
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,#3b82f633,transparent_50%)]" />
-        <div className="container relative mx-auto px-4 text-center">
-          <ScrollAnimation direction="up" delay={0.1}>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900/50 border border-zinc-800 text-sm text-zinc-400 mb-8">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-appPrimary opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-appPrimary"></span>
-              </span>
-              Trading Community v2.0 is Live
+      <section className="relative pt-24 md:pt-32 pb-24 md:pb-40 overflow-hidden min-h-screen flex items-center">
+        {/* Background Layer */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-black z-10 opacity-70 md:opacity-60" />
+          <img 
+            src="/trading_dashboard_hero.png" 
+            alt="Background" 
+            className="w-full h-full object-cover object-center md:object-right opacity-40 scale-110 animate-pulse-slow"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black z-20" />
+          <div className="absolute inset-0 bg-grid-white opacity-5 md:opacity-10 z-30" />
+        </div>
+
+        <div className="container relative mx-auto px-4 z-40">
+          <div className="max-w-5xl mx-auto text-center">
+            <ScrollAnimation direction="up" delay={0.1}>
+              <div className="inline-flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full glass-card text-[10px] md:text-sm text-zinc-300 mb-6 md:mb-10 border border-white/10">
+                <span className="relative flex h-1.5 w-1.5 md:h-2 md:w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-appPrimary opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 md:h-2 md:w-2 bg-appPrimary"></span>
+                </span>
+                <span className="font-medium tracking-widest uppercase">Elite Trading Ecosystem</span>
+              </div>
+            </ScrollAnimation>
+
+            <ScrollAnimation direction="up" delay={0.2}>
+              <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black tracking-tight text-white mb-6 md:mb-8 leading-[1.1] md:leading-[0.9]">
+                REVOLUSI <br className="hidden sm:block" />
+                <span className="text-gradient-gold">TRADING ANDA</span>
+              </h1>
+            </ScrollAnimation>
+
+            <ScrollAnimation direction="up" delay={0.3}>
+              <p className="max-w-3xl mx-auto text-base md:text-xl lg:text-2xl text-zinc-300 mb-10 md:mb-16 leading-relaxed font-light drop-shadow-2xl px-2">
+                Maksimalkan profit dengan <span className="text-appPrimary font-medium">EA Copytrade</span> otomatis, 
+                analisis <span className="text-appPrimary font-medium">Daily Outlook</span> akurat, 
+                dan bimbingan dalam <span className="text-appPrimary font-medium">Komunitas Profesional</span>.
+              </p>
+            </ScrollAnimation>
+
+            <ScrollAnimation direction="up" delay={0.4}>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6 mb-16 md:mb-24">
+                <Link
+                  href="/register"
+                  className={cn(
+                    buttonVariants({ size: "lg" }),
+                    "w-full sm:w-auto h-14 md:h-16 px-8 md:px-10 text-lg md:text-xl font-bold bg-appPrimary hover:bg-appPrimary/90 text-black rounded-full shadow-[0_0_30px_rgba(255,204,0,0.4)] transition-all duration-300 hover:scale-105 active:scale-95"
+                  )}
+                >
+                  Mulai Sekarang
+                  <ChevronRight className="ml-2 w-5 h-5 md:w-6 md:h-6" />
+                </Link>
+                <Link
+                  href="/services"
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "lg" }),
+                    "w-full sm:w-auto h-14 md:h-16 px-8 md:px-10 text-lg md:text-xl font-bold border-white/20 hover:bg-white/10 text-white rounded-full backdrop-blur-md transition-all duration-300"
+                  )}
+                >
+                  Explore Layanan
+                </Link>
+              </div>
+            </ScrollAnimation>
+
+            {/* Service Highlights Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+              <ScrollAnimation direction="up" delay={0.5}>
+                <div className="glass-card p-6 rounded-2xl border border-white/5 hover:border-appPrimary/30 transition-colors group">
+                  <Zap className="w-10 h-10 text-appPrimary mb-4 group-hover:scale-110 transition-transform" />
+                  <h3 className="text-white font-bold text-lg mb-2">EA Copytrade</h3>
+                  <p className="text-zinc-500 text-sm">Copy transaksi trader ahli secara otomatis 24/5 tanpa ribet.</p>
+                </div>
+              </ScrollAnimation>
+              
+              <ScrollAnimation direction="up" delay={0.6}>
+                <div className="glass-card p-6 rounded-2xl border border-white/5 hover:border-appPrimary/30 transition-colors group">
+                  <Globe className="w-10 h-10 text-appPrimary mb-4 group-hover:scale-110 transition-transform" />
+                  <h3 className="text-white font-bold text-lg mb-2">Daily Outlook</h3>
+                  <p className="text-zinc-500 text-sm">Analisis pasar harian mendalam untuk memandu setiap entry Anda.</p>
+                </div>
+              </ScrollAnimation>
+
+              <ScrollAnimation direction="up" delay={0.7}>
+                <div className="glass-card p-6 rounded-2xl border border-white/5 hover:border-appPrimary/30 transition-colors group">
+                  <Users className="w-10 h-10 text-appPrimary mb-4 group-hover:scale-110 transition-transform" />
+                  <h3 className="text-white font-bold text-lg mb-2">Komunitas Pro</h3>
+                  <p className="text-zinc-500 text-sm">Diskusi dan networking bersama ratusan trader profesional lainnya.</p>
+                </div>
+              </ScrollAnimation>
             </div>
-          </ScrollAnimation>
-
-          <ScrollAnimation direction="up" delay={0.2}>
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter text-white mb-8">
-              Trading Lebih <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-appPrimary to-blue-400">
-                Cerdas & Terarah
-              </span>
-            </h1>
-          </ScrollAnimation>
-
-          <ScrollAnimation direction="up" delay={0.3}>
-            <p className="max-w-2xl mx-auto text-lg text-zinc-400 mb-10 leading-relaxed">
-              Bergabunglah dengan komunitas trader profesional. Dapatkan akses ke alat analisis canggih, 
-              edukasi premium, dan sinyal trading akurat.
-            </p>
-          </ScrollAnimation>
-
-          <ScrollAnimation direction="up" delay={0.4}>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link
-                href="/register"
-                className={cn(
-                  buttonVariants({ size: "lg" }),
-                  "w-full sm:w-auto h-14 px-8 text-lg font-semibold bg-appPrimary hover:bg-appPrimary/90 text-black rounded-full"
-                )}
-              >
-                Mulai Sekarang
-                <ChevronRight className="ml-2 w-5 h-5" />
-              </Link>
-              <Link
-                href="/about"
-                className={cn(
-                  buttonVariants({ variant: "outline", size: "lg" }),
-                  "w-full sm:w-auto h-14 px-8 text-lg font-semibold border-zinc-800 hover:bg-zinc-900 text-white rounded-full"
-                )}
-              >
-                Pelajari Lebih Lanjut
-              </Link>
-            </div>
-          </ScrollAnimation>
+          </div>
         </div>
       </section>
 
       {/* Video Preview */}
-      <section className="py-20">
+      <section className="py-24 relative bg-black">
         <div className="container mx-auto px-4">
           <ScrollAnimation direction="up">
             <HeroVideoDialogWrapper />
