@@ -1,7 +1,7 @@
 // app/blog/[slug]/page.tsx
 import Link from "next/link";
 import Header from "@/components/ui/header";
-import Footer from "../../_components/footer"; // sesuaikan path kalau beda
+import Footer from "@/components/modules/landing/footer"; // sesuaikan path kalau beda
 import { notFound } from "next/navigation";
 
 // Placeholder data artikel (sudah ditambah 2 artikel baru: psikologi & supply demand)

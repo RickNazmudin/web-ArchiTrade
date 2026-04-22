@@ -17,7 +17,7 @@ const projects = [
             Langkah-langkah Praktis: Panduan step-by-step untuk memulai perjalanan trading Anda dengan percaya diri.
             Ebook ini dirancang khusus untuk membantu Anda membangun fondasi yang kokoh sebelum melangkah lebih jauh di pasar.`,
     src: "#",
-    link: "/ebook1.jpg",
+    link: "/images/ebook1.webp",
     color: "#5196fd",
   },
   {
@@ -31,7 +31,7 @@ const projects = [
       Potensi Setup Trading: Ide-ide trading yang mungkin muncul berdasarkan kondisi pasar terkini.
       Dengan pandangan harian ini, Anda akan selalu selangkah lebih maju dalam memahami dinamika pasar Forex.`,
     src: "#",
-    link: "/outlook.jpg",
+    link: "/images/outlook.webp",
     color: "#8f89ff",
   },
   {
@@ -46,7 +46,7 @@ const projects = [
       Networking: Bangun koneksi dengan individu-individu yang memiliki minat dan tujuan yang sama.
       Bergabunglah dengan diskusi kami dan rasakan kekuatan kolaborasi dalam mencapai kesuksesan trading!`,
     src: "#",
-    link: "/diskusi.jpg",
+    link: "/images/diskusi.webp",
     color: "#13006c",
   },
   {
@@ -59,7 +59,7 @@ const projects = [
       Q&A Interaktif: Dapatkan kesempatan untuk bertanya langsung kepada pembicara dan analis kami selama sesi berlangsung.
       Layanan ini dirancang untuk memberikan pengalaman belajar yang imersif dan praktis.`,
           src: "#",
-    link: "/komuni.png",
+    link: "/images/komuni.webp",
     color: "#ed649e",
   },
   {
@@ -73,7 +73,7 @@ const projects = [
       Daftar Rekomendasi Buku: Pilihan buku-buku terbaik tentang trading dan investasi yang patut Anda baca.
       Perpustakaan ini adalah sumber daya tak terbatas untuk perjalanan belajar Anda.`,
     src: "#",
-    link: "/library.png",
+    link: "/images/library.webp",
     color: "#fd521a",
   },
 ];
@@ -220,7 +220,7 @@ const Card: React.FC<CardProps> = ({
                           h-48 md:h-full min-h-[200px] md:min-h-[300px] 
                           rounded-lg overflow-hidden">
             <motion.div
-              className="w-full h-full transition-all duration-300"
+              className="relative w-full h-full transition-all duration-300"
               style={{ scale: imageScale }}
             >
               <Image 
@@ -229,7 +229,7 @@ const Card: React.FC<CardProps> = ({
                 alt={title} 
                 className="object-cover object-center"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 55vw, 60vw"
-                priority={i < 2} // Priority loading for first 2 images
+                loading="lazy"
               />
             </motion.div>
             <BorderBeam size={200} duration={12} delay={9} />

@@ -1,7 +1,10 @@
 // app/blog/page.tsx
 import Link from "next/link";
 import Header from "@/components/ui/header";
-import Footer from "../_components/footer";
+import Footer from "@/components/modules/landing/footer";
+
+// Enable ISR - Revalidate every 1 hour
+export const revalidate = 3600;
 
 // Placeholder data artikel (ganti dengan fetch dari API/CMS nanti)
 const blogPosts = [
@@ -129,8 +132,6 @@ export default function BlogPage() {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

@@ -1,7 +1,20 @@
 // app/about/page.tsx
 import Link from "next/link";
 import Header from "@/components/ui/header";
-import Footer from "../_components/footer"; // sesuaikan path kalau beda
+import Footer from "@/components/modules/landing/footer";
+
+// Enable ISR - Revalidate every 1 hour
+export const revalidate = 3600;
+
+// Import icons modern dari lucide-react
+import {
+  GraduationCap,
+  Users,
+  BarChart3,
+  UserCheck,
+  Calendar,
+  Brain,
+} from "lucide-react";
 
 export default function AboutPage() {
   return (
@@ -9,7 +22,7 @@ export default function AboutPage() {
       <Header />
 
       <main className="relative pt-20 pb-24 overflow-hidden">
-        {/* Background subtle gradient + grain overlay (sudah ada di layout) */}
+        {/* Background subtle gradient + grain overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-zinc-950 via-black to-zinc-950 opacity-80 pointer-events-none" />
 
         <div className="relative mx-auto max-w-6xl px-6 lg:px-12">
@@ -59,15 +72,17 @@ export default function AboutPage() {
               {features.map((feature, index) => (
                 <div
                   key={index}
-                  className="bg-zinc-900/40 border border-zinc-800/80 rounded-xl p-6 hover:border-appPrimary/50 transition-all duration-300 group"
+                  className="bg-zinc-900/40 border border-zinc-800/80 rounded-2xl p-8 hover:border-appPrimary/50 transition-all duration-300 group hover:scale-[1.02]"
                 >
-                  <div className="text-3xl mb-4 text-appPrimary">
+                  <div className="w-14 h-14 flex items-center justify-center bg-appPrimary/10 rounded-2xl mb-6 text-appPrimary group-hover:bg-appPrimary/20 transition-colors">
                     {feature.icon}
                   </div>
-                  <h3 className="text-xl font-semibold mb-3 group-hover:text-appPrimary transition-colors">
+                  <h3 className="text-xl font-semibold mb-4 group-hover:text-appPrimary transition-colors">
                     {feature.title}
                   </h3>
-                  <p className="text-zinc-400">{feature.description}</p>
+                  <p className="text-zinc-400 leading-relaxed">
+                    {feature.description}
+                  </p>
                 </div>
               ))}
             </div>
@@ -84,14 +99,14 @@ export default function AboutPage() {
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link
-                href="https://t.me/+s22nBUElvnw0Y2Y1" // sesuaikan path kalau ada halaman join/register
-                className="inline-flex items-center justify-center rounded-lg bg-appPrimary px-8 py-4 text-lg font-medium text-white hover:bg-appPrimary-500 transition-colors shadow-lg shadow-appPrimary/20"
+                href="https://t.me/+s22nBUElvnw0Y2Y1"
+                className="inline-flex items-center justify-center rounded-xl bg-appPrimary px-8 py-4 text-lg font-medium text-black hover:brightness-95 transition-all shadow-lg shadow-appPrimary/30"
               >
                 Daftar Sekarang
               </Link>
               <Link
                 href="/contact"
-                className="inline-flex items-center justify-center rounded-lg border border-zinc-700 px-8 py-4 text-lg font-medium text-zinc-300 hover:border-appPrimary hover:text-appPrimary transition-colors"
+                className="inline-flex items-center justify-center rounded-xl border border-zinc-700 px-8 py-4 text-lg font-medium text-zinc-300 hover:border-appPrimary hover:text-appPrimary transition-all"
               >
                 Hubungi Kami
               </Link>
@@ -99,45 +114,43 @@ export default function AboutPage() {
           </section>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }
 
 const features = [
   {
-    icon: "🎓",
+    icon: <GraduationCap className="w-8 h-8" />,
     title: "Edukasi Berkualitas",
     description:
       "Webinar mingguan, artikel mendalam, dan kursus terstruktur dari trader berpengalaman.",
   },
   {
-    icon: "🤝",
+    icon: <Users className="w-8 h-8" />,
     title: "Komunitas Aktif",
     description:
       "Diskusi harian, sharing setup, review trade, dan support 24/7 di grup eksklusif.",
   },
   {
-    icon: "📊",
+    icon: <BarChart3 className="w-8 h-8" />,
     title: "Tools & Resources",
     description:
       "Template trading journal, screener saham/forex/crypto, dan analisis pasar terkini.",
   },
   {
-    icon: "🧠",
+    icon: <UserCheck className="w-8 h-8" />,
     title: "Mentorship",
     description:
       "Program 1-on-1 dan group mentoring untuk mempercepat perkembangan skill Anda.",
   },
   {
-    icon: "🔥",
+    icon: <Calendar className="w-8 h-8" />,
     title: "Event Eksklusif",
     description:
       "Live trading session, challenge bulanan, dan gathering offline untuk member aktif.",
   },
   {
-    icon: "⚖️",
+    icon: <Brain className="w-8 h-8" />,
     title: "Psikologi Trading",
     description:
       "Fokus khusus pada manajemen emosi, disiplin, dan pengembangan mindset trader pemenang.",

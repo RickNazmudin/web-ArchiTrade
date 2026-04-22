@@ -2,6 +2,15 @@ import "./globals.css";
 import "../styles/grains.css";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { Toaster } from "sonner";
+import Footer from "@/components/modules/landing/footer";
+import { validateEnvironment } from "@/lib/validateEnv";
+
+// ✅ Validate environment at startup
+if (typeof window === "undefined") {
+  // Server-side only
+  validateEnvironment();
+}
 
 const inter = Inter({
   subsets: ["latin"],
@@ -20,10 +29,30 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className={cn("min-h-screen bg-black antialiased", inter.variable)}>
+    <html lang="id" className="dark" suppressHydrationWarning>
+      <body
+        className={cn(
+          "min-h-screen bg-black antialiased flex flex-col",
+          inter.variable,
+        )}
+      >
         <div className="grain"></div>
-        {children}
+        <div className="flex flex-col min-h-screen">
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </div>
+        <Toaster
+          position="top-right"
+          richColors
+          toastOptions={{
+            style: {
+              background: "#18181b",
+              border: "1px solid #27272a",
+              color: "#fafafa",
+            },
+            duration: 4000,
+          }}
+        />
       </body>
     </html>
   );

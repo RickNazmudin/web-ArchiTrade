@@ -1,8 +1,11 @@
 "use client";
 
 import Header from "@/components/ui/header";
-import Footer from "../_components/footer";
+import Footer from "@/components/modules/landing/footer";
 import { useState } from "react";
+
+// Import icons modern dari lucide-react
+import { Mail, MessageCircle, Phone, Send } from "lucide-react";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -41,31 +44,34 @@ export default function ContactPage() {
             </p>
           </section>
 
+          {/* Contact Options dengan Icon Modern */}
           <section className="grid md:grid-cols-3 gap-8 mb-20">
             {contactOptions.map((option, index) => (
               <div
                 key={index}
                 className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8 text-center backdrop-blur-sm hover:border-appPrimary/50 transition-all duration-300 group"
               >
-                <div className="text-4xl mb-6 text-appPrimary">
+                <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center bg-appPrimary/10 rounded-2xl text-appPrimary group-hover:bg-appPrimary/20 transition-colors">
                   {option.icon}
                 </div>
                 <h3 className="text-xl font-bold mb-3 group-hover:text-appPrimary transition-colors">
                   {option.title}
                 </h3>
-                <p className="text-zinc-400 mb-4">{option.description}</p>
+                <p className="text-zinc-400 mb-6">{option.description}</p>
                 <a
                   href={option.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-appPrimary hover:text-appPrimary-400 font-medium transition-colors"
+                  className="inline-flex items-center gap-2 text-appPrimary hover:text-appPrimary-400 font-medium transition-colors"
                 >
                   {option.action}
+                  <Send className="w-4 h-4" />
                 </a>
               </div>
             ))}
           </section>
 
+          {/* Form Section */}
           <section className="max-w-3xl mx-auto">
             <div className="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-8 lg:p-12 backdrop-blur-sm">
               <h2 className="text-3xl font-bold mb-8 text-center">
@@ -132,41 +138,40 @@ export default function ContactPage() {
 
                 <button
                   type="submit"
-                  className="w-full bg-appPrimary hover:bg-appPrimary/90 text-black font-bold py-4 px-8 rounded-xl transition shadow-lg shadow-appPrimary/20 text-lg"
+                  className="w-full bg-appPrimary hover:bg-appPrimary/90 text-black font-bold py-4 px-8 rounded-xl transition shadow-lg shadow-appPrimary/20 text-lg flex items-center justify-center gap-2"
                 >
                   Kirim Pesan
+                  <Send className="w-5 h-5" />
                 </button>
               </form>
             </div>
           </section>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }
 
 const contactOptions = [
   {
-    icon: "📧",
+    icon: <Mail className="w-9 h-9" />,
     title: "Email",
     description: "Untuk pertanyaan formal atau proposal",
     action: "tradearchi@gmail.com",
     link: "mailto:tradearchi@gmail.com?subject=Pertanyaan%20dari%20Website",
   },
   {
-    icon: "💬",
+    icon: <MessageCircle className="w-9 h-9" />,
     title: "Telegram",
     description: "Respon cepat untuk diskusi trading",
     action: "@ArchiTrade99",
     link: "https://t.me/ArchiTrade99",
   },
   {
-    icon: "📱",
+    icon: <Phone className="w-9 h-9" />,
     title: "WhatsApp",
     description: "Chat langsung 24/7 (preferensi utama)",
     action: "Chat via WA",
-    link: "https://wa.me/6289617257030?text=Halo%20Admin%20ArchiTrade,%20saya%20ingin%20bertanya%20tentang...", // ganti nomor asli
+    link: "https://wa.me/6289617257030?text=Halo%20Admin%20ArchiTrade,%20saya%20ingin%20bertanya%20tentang...",
   },
 ];
