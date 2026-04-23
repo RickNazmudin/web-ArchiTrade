@@ -52,7 +52,7 @@ export const TABLES = {
 // ─── User Roles ───────────────────────────────────────────────
 export const USER_ROLES = {
   ADMIN: "admin",
-  USER: "user",
+  USER: "customer",
 } as const;
 
 // ─── UI Constants ─────────────────────────────────────────────
