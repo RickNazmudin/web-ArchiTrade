@@ -136,8 +136,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ✅ Create profile
-    const { error: profileError } = await supabase.from("profiles").insert([
+    // ✅ Create profile (Gunakan Admin Client untuk bypass RLS saat registrasi)
+    const adminClient = createSupabaseAdmin();
+    if (!adminClient) {
+      return NextResponse.json(
+        { error: "Server configuration error (Admin client missing)" },
+        { status: 500 },
+      );
+    }
+
+    const { error: profileError } = await adminClient.from("profiles").insert([
       {
         id: data.user.id,
         email,
@@ -151,12 +159,7 @@ export async function POST(request: NextRequest) {
     if (profileError) {
       console.error("[API] Profile creation error:", profileError);
       // ✅ Cleanup: Delete from Auth if Profile creation failed
-      const adminClient = createSupabaseAdmin();
-      if (adminClient) {
-        await adminClient.auth.admin.deleteUser(data.user.id);
-      } else {
-        console.warn("Could not cleanup user: admin client not available");
-      }
+      await adminClient.auth.admin.deleteUser(data.user.id);
       return NextResponse.json(
         { error: MESSAGES.ERROR.SAVE_FAILED },
         { status: 500 },
