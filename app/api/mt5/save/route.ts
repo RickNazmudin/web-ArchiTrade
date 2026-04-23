@@ -2,6 +2,15 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { encrypt } from "@/lib/encryption";
+import { z } from "zod";
+
+// Skema validasi untuk input MT5
+const mt5Schema = z.object({
+  id: z.string().uuid().optional(),
+  mt5_id: z.string().min(3, "ID MT5 terlalu pendek").max(50),
+  mt5_password: z.string().min(1, "Password diperlukan").optional().or(z.literal("")),
+  mt5_server: z.string().min(3, "Nama server tidak valid"),
+});
 
 export async function POST(request: Request) {
   try {
@@ -34,11 +43,17 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { id, mt5_id, mt5_password, mt5_server } = body;
-
-    if (!mt5_id || !mt5_server) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    
+    // Validasi dengan Zod
+    const validation = mt5Schema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json({ 
+        error: "Validation failed", 
+        details: validation.error.format() 
+      }, { status: 400 });
     }
+
+    const { id, mt5_id, mt5_password, mt5_server } = validation.data;
 
     if (id) {
       // MODE EDIT: Update akun spesifik berdasarkan ID
@@ -50,7 +65,7 @@ export async function POST(request: Request) {
         .maybeSingle();
 
       if (fetchError || !existingAccount) {
-        return NextResponse.json({ error: "Account not found" }, { status: 404 });
+        return NextResponse.json({ error: "Account not found or access denied" }, { status: 404 });
       }
 
       let encryptedPassword = existingAccount.mt5_password;
@@ -65,7 +80,8 @@ export async function POST(request: Request) {
           mt5_password: encryptedPassword,
           mt5_server,
         })
-        .eq("id", id);
+        .eq("id", id)
+        .eq("user_id", user.id); // Double check: pastikan tetap milik user yang sama
 
       if (updateError) throw updateError;
     } else {
@@ -83,7 +99,7 @@ export async function POST(request: Request) {
       }
 
       // 2. Untuk akun baru, password WAJIB ada
-      if (!mt5_password) {
+      if (!mt5_password || mt5_password.trim() === "") {
         return NextResponse.json({ error: "Password MT5 diperlukan untuk akun baru" }, { status: 400 });
       }
       
