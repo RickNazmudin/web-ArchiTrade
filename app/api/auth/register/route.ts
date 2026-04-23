@@ -145,16 +145,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { error: profileError } = await adminClient.from("profiles").insert([
+    const { error: profileError } = await adminClient.from("profiles").upsert([
       {
         id: data.user.id,
         email,
         full_name: fullName,
         role: USER_ROLES.USER,
-        created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       },
-    ]);
+    ], { onConflict: 'id' });
 
     if (profileError) {
       console.error("[API] Profile creation error:", profileError);
