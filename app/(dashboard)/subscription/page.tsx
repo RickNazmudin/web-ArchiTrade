@@ -143,12 +143,10 @@ function SubscriptionContent() {
       .eq("is_active", true);
     setPlans(plansData && plansData.length > 0 ? plansData : defaultPlans);
 
-    const { data: mt5Data } = await supabase
-      .from("mt5_accounts")
-      .select("*")
-      .eq("user_id", currentUser.id);
-    
-    if (!mt5Data || mt5Data.length === 0) {
+    const mt5Res = await fetch("/api/mt5/list");
+    const mt5Data = await mt5Res.json();
+
+    if (!Array.isArray(mt5Data) || mt5Data.length === 0) {
       toast.error("Hubungkan akun MT5 terlebih dahulu");
       router.push("/dashboard");
       return;
@@ -189,6 +187,12 @@ function SubscriptionContent() {
       setError("Pilih paket terlebih dahulu");
       return;
     }
+
+    const existingSub = subsMap[mt5Account?.id];
+    if (existingSub && (existingSub.status === "active" || existingSub.status === "pending")) {
+      setError("Akun ini sudah memiliki langganan aktif");
+      return;
+    }
     const depositAmount = parseFloat(deposit);
     if (isNaN(depositAmount) || depositAmount <= 0) {
       setError("Masukkan jumlah deposit yang valid");
@@ -208,11 +212,11 @@ function SubscriptionContent() {
     // VALIDASI BROKER SERVER
     const requiredBroker = planMeta[selectedPlan.name]?.broker.toLowerCase();
     const accountServer = mt5Account.mt5_server.toLowerCase();
-    
+
     if (!accountServer.includes(requiredBroker)) {
-        setError(`Paket ${selectedPlan.name} khusus untuk broker ${planMeta[selectedPlan.name]?.broker}. Server akun MT5 Anda (${mt5Account.mt5_server}) tidak sesuai.`);
-        toast.error("Broker tidak sesuai");
-        return;
+      setError(`Paket ${selectedPlan.name} khusus untuk broker ${planMeta[selectedPlan.name]?.broker}. Server akun MT5 Anda (${mt5Account.mt5_server}) tidak sesuai.`);
+      toast.error("Broker tidak sesuai");
+      return;
     }
 
     setSubmitting(true);
@@ -236,7 +240,7 @@ function SubscriptionContent() {
       toast.success(
         `Berhasil mengajukan paket ${selectedPlan.name}! Menunggu konfirmasi admin.`,
       );
-      router.push("/dashboard");
+      router.push("/invoices");
     } catch (err: any) {
       setError(err.message);
       toast.error("Gagal berlangganan");
@@ -358,42 +362,15 @@ function SubscriptionContent() {
             </p>
 
             {isPending && (
-              <div className="mb-8 p-5 rounded-2xl bg-white/5 border border-white/10 text-left">
-                <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-3 text-center font-bold">
-                  Detail Transfer Bank
-                </p>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-zinc-500">Bank</span>
-                    <span className="text-white font-bold">BCA</span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-zinc-500">No. Rekening</span>
-                    <span className="text-emerald-400 font-mono font-bold tracking-tighter">
-                      2801365487
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-zinc-500">Atas Nama</span>
-                    <span className="text-white font-bold uppercase">
-                      Cecep Najmudin
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs border-t border-white/5 pt-3">
-                    <span className="text-zinc-500">Total Bayar</span>
-                    <span className="text-white font-extrabold text-sm">
-                      Rp
-                      {existingSubscription.subscription_plans?.price_monthly.toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-                <p className="mt-4 text-[10px] text-zinc-500 text-center italic">
-                  Hubungi admin setelah transfer untuk aktivasi instan.
+              <div className="mb-8 p-5 rounded-2xl bg-white/5 border border-white/10 text-center">
+                <p className="text-[11px] text-zinc-400 leading-relaxed">
+                  Silakan lakukan pembayaran melalui <strong>Payment Link Midtrans</strong> yang dibagikan oleh admin.
+                  Buka halaman tagihan Anda untuk melanjutkan proses pembayaran.
                 </p>
               </div>
             )}
             <Link
-              href="/dashboard"
+              href="/invoices"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-black text-sm transition hover:opacity-90"
               style={{
                 background: isPending
@@ -404,7 +381,7 @@ function SubscriptionContent() {
                 color: isPending || isSuspended ? "#fff" : "#000",
               }}
             >
-              Ke Dashboard <ChevronRight className="h-4 w-4" />
+              Ke Halaman Tagihan <ChevronRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
@@ -453,65 +430,63 @@ function SubscriptionContent() {
 
         {/* Account Selector */}
         <div className="max-w-4xl mx-auto mb-12 bg-[#0d0d14] rounded-2xl border border-white/5 p-4 sm:p-6">
-           <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-black mb-4 flex items-center gap-2">
-              <Wallet className="h-3 w-3" /> Step 1: Pilih Akun MT5 Anda
-           </p>
-           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-              {mt5Accounts.map(acc => (
-                 <div 
-                   key={acc.id}
-                   onClick={() => {
-                     setMt5Account(acc);
-                     setError("");
-                   }}
-                   className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                     mt5Account?.id === acc.id 
-                       ? "bg-appPrimary/10 border-appPrimary shadow-[0_0_15px_rgba(255,204,0,0.1)]" 
-                       : "bg-white/3 border-white/5 hover:bg-white/5"
-                   }`}
-                 >
-                    <div className="flex items-center gap-3">
-                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${mt5Account?.id === acc.id ? "bg-appPrimary/20" : "bg-white/5"}`}>
-                          <CheckCircle className={`h-4 w-4 ${mt5Account?.id === acc.id ? "text-appPrimary" : "text-zinc-700"}`} />
-                       </div>
-                       <div>
-                          <p className={`text-sm font-bold ${mt5Account?.id === acc.id ? "text-appPrimary" : "text-white"}`}>{acc.mt5_id}</p>
-                          <p className="text-[10px] text-zinc-500 uppercase truncate max-w-[120px]">{acc.mt5_server}</p>
-                       </div>
-                    </div>
-                    {subsMap[acc.id] && (
-                       <div className="mt-3 pt-2 border-t border-white/5 flex items-center justify-between">
-                          <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-tight">Status:</span>
-                          <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full ${
-                             subsMap[acc.id].status === "active" ? "bg-emerald-500/10 text-emerald-500" : "bg-amber-500/10 text-amber-500"
-                          }`}>
-                            {subsMap[acc.id].status}
-                          </span>
-                       </div>
-                    )}
-                 </div>
-              ))}
-              <Link
-                href="/dashboard"
-                className="p-4 rounded-xl border border-white/5 bg-white/1 border-dashed flex items-center justify-center gap-2 text-zinc-500 hover:text-white hover:bg-white/5 transition group"
+          <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-black mb-4 flex items-center gap-2">
+            <Wallet className="h-3 w-3" /> Step 1: Pilih Akun MT5 Anda
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            {mt5Accounts.map(acc => (
+              <div
+                key={acc.id}
+                onClick={() => {
+                  setMt5Account(acc);
+                  setError("");
+                }}
+                className={`p-4 rounded-xl border cursor-pointer transition-all ${mt5Account?.id === acc.id
+                    ? "bg-appPrimary/10 border-appPrimary shadow-[0_0_15px_rgba(255,204,0,0.1)]"
+                    : "bg-white/3 border-white/5 hover:bg-white/5"
+                  }`}
               >
-                 <Plus className="h-4 w-4 group-hover:scale-110 transition" />
-                 <span className="text-xs font-bold">Tambah Akun</span>
-              </Link>
-           </div>
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${mt5Account?.id === acc.id ? "bg-appPrimary/20" : "bg-white/5"}`}>
+                    <CheckCircle className={`h-4 w-4 ${mt5Account?.id === acc.id ? "text-appPrimary" : "text-zinc-700"}`} />
+                  </div>
+                  <div>
+                    <p className={`text-sm font-bold ${mt5Account?.id === acc.id ? "text-appPrimary" : "text-white"}`}>{acc.mt5_id}</p>
+                    <p className="text-[10px] text-zinc-500 uppercase truncate max-w-[120px]">{acc.mt5_server}</p>
+                  </div>
+                </div>
+                {subsMap[acc.id] && (
+                  <div className="mt-3 pt-2 border-t border-white/5 flex items-center justify-between">
+                    <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-tight">Status:</span>
+                    <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full ${subsMap[acc.id].status === "active" ? "bg-emerald-500/10 text-emerald-500" : "bg-amber-500/10 text-amber-500"
+                      }`}>
+                      {subsMap[acc.id].status}
+                    </span>
+                  </div>
+                )}
+              </div>
+            ))}
+            <Link
+              href="/dashboard"
+              className="p-4 rounded-xl border border-white/5 bg-white/1 border-dashed flex items-center justify-center gap-2 text-zinc-500 hover:text-white hover:bg-white/5 transition group"
+            >
+              <Plus className="h-4 w-4 group-hover:scale-110 transition" />
+              <span className="text-xs font-bold">Tambah Akun</span>
+            </Link>
+          </div>
         </div>
 
         {mt5Account && (
-            <div className="text-center mb-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                <p className="text-zinc-500 text-sm">
-                    Mendaftarkan lisensi untuk akun <span className="text-appPrimary font-bold">{mt5Account.mt5_id}</span> ({mt5Account.mt5_server})
-                </p>
-                {subsMap[mt5Account.id] && (
-                    <p className="text-amber-400 text-xs mt-2 font-medium">
-                        ⚠️ Akun ini sudah memiliki langganan {subsMap[mt5Account.id].status}.
-                    </p>
-                )}
-            </div>
+          <div className="text-center mb-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <p className="text-zinc-500 text-sm">
+              Mendaftarkan lisensi untuk akun <span className="text-appPrimary font-bold">{mt5Account.mt5_id}</span> ({mt5Account.mt5_server})
+            </p>
+            {subsMap[mt5Account.id] && (
+              <p className="text-amber-400 text-xs mt-2 font-medium">
+                ⚠️ Akun ini sudah memiliki langganan {subsMap[mt5Account.id].status}.
+              </p>
+            )}
+          </div>
         )}
 
         {/* Plan cards */}
@@ -526,9 +501,10 @@ function SubscriptionContent() {
               <div
                 key={plan.id}
                 onClick={() => {
-                  if (subsMap[mt5Account?.id]) {
-                      toast.error("Akun ini sudah memiliki langganan aktif");
-                      return;
+                  const existingSub = subsMap[mt5Account?.id];
+                  if (existingSub && (existingSub.status === "active" || existingSub.status === "pending")) {
+                    toast.error("Akun ini sudah memiliki langganan aktif");
+                    return;
                   }
                   setSelectedPlan(plan);
                   setDeposit("");
@@ -660,13 +636,13 @@ function SubscriptionContent() {
                     style={
                       isSelected
                         ? {
-                            background: `linear-gradient(135deg, ${meta.accent}, ${meta.accent}cc)`,
-                            color: "#000",
-                          }
+                          background: `linear-gradient(135deg, ${meta.accent}, ${meta.accent}cc)`,
+                          color: "#000",
+                        }
                         : {
-                            background: "rgba(255,255,255,0.05)",
-                            color: "#fff",
-                          }
+                          background: "rgba(255,255,255,0.05)",
+                          color: "#fff",
+                        }
                     }
                   >
                     {isSelected ? "✓ Dipilih" : "Pilih Paket Ini"}
@@ -823,7 +799,7 @@ function DepositForm({
                     (depositNum /
                       (selectedPlan.max_deposit ||
                         selectedPlan.min_deposit * 2)) *
-                      100,
+                    100,
                   )}%`,
                   background: isValidDeposit ? meta.accent : "#ef4444",
                 }}
@@ -834,8 +810,8 @@ function DepositForm({
                 ? "✓ Deposit dalam range yang valid"
                 : depositNum < selectedPlan.min_deposit
                   ? `Kurang $${(
-                      selectedPlan.min_deposit - depositNum
-                    ).toLocaleString()}`
+                    selectedPlan.min_deposit - depositNum
+                  ).toLocaleString()}`
                   : `Melebihi maksimal $${selectedPlan.max_deposit?.toLocaleString()}`}
             </p>
           </div>

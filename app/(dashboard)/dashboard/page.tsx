@@ -7,6 +7,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import Image from "next/image";
 import { Instagram, Music2 } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   LogOut,
@@ -54,6 +55,99 @@ import {
 export default function DashboardPage() {
   const router = useRouter();
   const supabase = createClient();
+  const queryClient = useQueryClient();
+
+  const { data: userData } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push("/login");
+        return null;
+      }
+      return user;
+    }
+  });
+
+  const { data: profileData } = useQuery({
+    queryKey: ["profile", userData?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userData!.id)
+        .single();
+      return data;
+    },
+    enabled: !!userData?.id
+  });
+
+  const { data: mt5Data } = useQuery({
+    queryKey: ["mt5Accounts"],
+    queryFn: async () => {
+      const mt5Res = await fetch("/api/mt5/list");
+      const data = await mt5Res.json();
+      return Array.isArray(data) ? data : [];
+    }
+  });
+
+  const { data: subsMapData } = useQuery({
+    queryKey: ["subscriptions", userData?.id],
+    queryFn: async () => {
+      const { data: subsData, error: subError } = await supabase
+        .from("subscriptions")
+        .select("*, subscription_plans!fk_subscriptions_plans(*)")
+        .eq("user_id", userData!.id)
+        .in("status", ["active", "suspended", "pending"]);
+
+      const subsMap: Record<string, any> = {};
+      
+      if (subError) {
+        const { data: fallbackSubs } = await supabase
+          .from("subscriptions")
+          .select("*")
+          .eq("user_id", userData!.id)
+          .in("status", ["active", "suspended", "pending"]);
+
+        if (fallbackSubs && fallbackSubs.length > 0) {
+          for (const sub of fallbackSubs) {
+            const { data: planData } = await supabase
+              .from("subscription_plans")
+              .select("*")
+              .eq("id", sub.plan_id)
+              .single();
+            
+            if (sub.mt5_account_id) {
+              subsMap[sub.mt5_account_id] = { ...sub, subscription_plans: planData };
+            }
+          }
+        }
+      } else if (subsData) {
+        subsData.forEach(sub => {
+          if (sub.mt5_account_id) {
+            subsMap[sub.mt5_account_id] = sub;
+          }
+        });
+      }
+      return subsMap;
+    },
+    enabled: !!userData?.id
+  });
+
+  const { data: notifData } = useQuery({
+    queryKey: ["unreadNotifs", userData?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", userData!.id)
+        .eq("is_read", false)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      return data || [];
+    },
+    enabled: !!userData?.id
+  });
 
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
@@ -314,89 +408,23 @@ export default function DashboardPage() {
   ];
 
   useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const {
-        data: { user: currentUser },
-      } = await supabase.auth.getUser();
-
-      if (!currentUser) {
-        router.push("/login");
-        return;
-      }
-      setUser(currentUser);
-
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", currentUser.id)
-        .single();
-      setProfile(profileData);
-
-      const { data: mt5Data } = await supabase
-        .from("mt5_accounts")
-        .select("*")
-        .eq("user_id", currentUser.id);
-      setMt5Accounts(mt5Data || []);
-
-      // Ambil SEMUA subscription (Manual Linker logic)
-      const { data: subsData, error: subError } = await supabase
-        .from("subscriptions")
-        .select("*, subscription_plans!fk_subscriptions_plans(*)")
-        .eq("user_id", currentUser.id)
-        .in("status", ["active", "suspended", "pending"]);
-
-      const subsMap: Record<string, any> = {};
-      
-      if (subError) {
-        console.warn("User Sub Join failed, using manual mapper fallback:", subError.message);
-        const { data: fallbackSubs } = await supabase
-          .from("subscriptions")
-          .select("*")
-          .eq("user_id", currentUser.id)
-          .in("status", ["active", "suspended", "pending"]);
-
-        if (fallbackSubs && fallbackSubs.length > 0) {
-          for (const sub of fallbackSubs) {
-            const { data: planData } = await supabase
-              .from("subscription_plans")
-              .select("*")
-              .eq("id", sub.plan_id)
-              .single();
-            
-            if (sub.mt5_account_id) {
-              subsMap[sub.mt5_account_id] = { ...sub, subscription_plans: planData };
-            }
-          }
-        }
-      } else if (subsData) {
-        subsData.forEach(sub => {
-          if (sub.mt5_account_id) {
-            subsMap[sub.mt5_account_id] = sub;
-          }
-        });
-      }
-      setActiveSubscriptions(subsMap);
-
-      // Ambil notifikasi unread
-      const { data: notifData } = await supabase
-        .from("notifications")
-        .select("*")
-        .eq("user_id", currentUser.id)
-        .eq("is_read", false)
-        .order("created_at", { ascending: false })
-        .limit(5);
-      setUnreadNotifs(notifData || []);
-    } catch (err: any) {
-      console.error("Dashboard Load Error:", err);
-      toast.error("Gagal memuat data dashboard");
-    } finally {
+    if (userData) setUser(userData);
+    if (profileData) setProfile(profileData);
+    if (mt5Data) setMt5Accounts(mt5Data);
+    if (subsMapData) setActiveSubscriptions(subsMapData);
+    if (notifData) setUnreadNotifs(notifData);
+    
+    if (userData && profileData && mt5Data && subsMapData && notifData) {
       setLoading(false);
     }
+  }, [userData, profileData, mt5Data, subsMapData, notifData]);
+
+  const loadData = async () => {
+    queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+    queryClient.invalidateQueries({ queryKey: ["profile"] });
+    queryClient.invalidateQueries({ queryKey: ["mt5Accounts"] });
+    queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
+    queryClient.invalidateQueries({ queryKey: ["unreadNotifs"] });
   };
 
   const handleLogout = async () => {

@@ -103,12 +103,14 @@ export default async function AdminDashboard() {
     { data: mt5Data },
     { data: pendingSubsData },
     { data: pendingInvData },
+    { data: unpaidInvData },
   ] = await Promise.all([
     supabase.from("profiles").select("*").order("created_at", { ascending: false }),
     supabase.from("subscriptions").select("id").eq("status", "active"),
     supabase.from("mt5_accounts").select("id"),
     supabase.from("subscriptions").select("id").eq("status", "pending"),
     supabase.from("invoices").select("id").eq("status", "pending_confirmation"),
+    supabase.from("invoices").select("id").eq("status", "pending"),
   ]);
 
   // 3. Process Stats
@@ -122,6 +124,8 @@ export default async function AdminDashboard() {
     pendingSubsCount: pendingSubsData?.length || 0,
     pendingInvoicesCount: pendingInvData?.length || 0,
   };
+
+  const unpaidInvoicesCount = unpaidInvData?.length || 0;
 
   const subRate = stats.totalCustomers > 0 ? Math.round((stats.totalSubscriptions / stats.totalCustomers) * 100) : 0;
   const mt5Rate = stats.totalCustomers > 0 ? Math.round((stats.totalMt5Accounts / stats.totalCustomers) * 100) : 0;
@@ -187,10 +191,10 @@ export default async function AdminDashboard() {
       {/* ── MAIN ────────────────────────────────────────── */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 pb-20 space-y-12">
         {/* Action Alerts */}
-        {(stats.pendingSubsCount > 0 || stats.pendingInvoicesCount > 0) && (
+        {(stats.pendingSubsCount > 0 || stats.pendingInvoicesCount > 0 || unpaidInvoicesCount > 0) && (
           <MotionWrapper className="space-y-4">
             <SectionLabel icon={AlertCircle} label="Priority Actions" />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {stats.pendingSubsCount > 0 && (
                 <div className="group bg-amber-500/5 backdrop-blur-md border border-amber-500/20 rounded-2xl p-5 flex items-center justify-between gap-4 hover:border-amber-500/40 transition-all">
                   <div className="flex items-center gap-4">
@@ -226,6 +230,25 @@ export default async function AdminDashboard() {
                     className="px-6 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-black rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.2)] active:scale-95"
                   >
                     VERIFIKASI
+                  </Link>
+                </div>
+              )}
+              {unpaidInvoicesCount > 0 && (
+                <div className="group bg-rose-500/5 backdrop-blur-md border border-rose-500/20 rounded-2xl p-5 flex items-center justify-between gap-4 hover:border-rose-500/40 transition-all">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-rose-500/20 border border-rose-500/20 flex items-center justify-center text-rose-400 shrink-0 group-hover:scale-110 transition-transform">
+                      <FileText className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-rose-100 font-bold text-base">{unpaidInvoicesCount} Belum Bayar (Pending)</h3>
+                      <p className="text-rose-400/60 text-xs font-medium">Tagihan aktif yang belum dibayar</p>
+                    </div>
+                  </div>
+                  <Link
+                    href="/admin/invoices"
+                    className="px-6 py-2.5 bg-rose-500 hover:bg-rose-400 text-black text-xs font-black rounded-xl transition-all shadow-[0_0_20px_rgba(244,63,94,0.2)] active:scale-95"
+                  >
+                    DETAIL
                   </Link>
                 </div>
               )}

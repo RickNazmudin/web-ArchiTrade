@@ -23,9 +23,8 @@ export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
-  const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [confirming, setConfirming] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
 
   const supabase = createClient();
   const router = useRouter();
@@ -43,6 +42,17 @@ export default function InvoicesPage() {
     if (!user) {
       router.push("/login");
       return;
+    }
+    setUser(user);
+
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+
+    if (profileData) {
+      setProfile(profileData);
     }
 
     // Mencoba join otomatis (Manual Linker logic fallback)
@@ -144,29 +154,6 @@ export default function InvoicesPage() {
     }
   };
 
-  const handleConfirmPayment = async () => {
-    if (!selectedInvoice) return;
-    setConfirming(true);
-    try {
-      const { error } = await supabase
-        .from("invoices")
-        .update({ status: "pending_confirmation" })
-        .eq("id", selectedInvoice.id);
-
-      if (error) throw error;
-
-      toast.success("Konfirmasi berhasil terkirim!", {
-        description: "Admin akan segera memverifikasi pembayaran Anda.",
-      });
-      setShowPaymentModal(false);
-      await loadInvoices();
-    } catch (err: any) {
-      toast.error("Gagal mengirim konfirmasi: " + err.message);
-    } finally {
-      setConfirming(false);
-    }
-  };
-
   const handleDownloadInvoice = async (invoice: any) => {
     setDownloadingId(invoice.id);
 
@@ -180,6 +167,8 @@ export default function InvoicesPage() {
     const amountUsd = invoice.amount_usd
       ? `($${invoice.amount_usd.toFixed(2)})`
       : "";
+    const isProfitShare = !!invoice.profit_usd_ref;
+    const invoiceType = isProfitShare ? "Bagi Hasil (Profit Share)" : "Pembelian Lisensi";
     const date = new Date(invoice.created_at).toLocaleDateString("id-ID", {
       day: "numeric",
       month: "long",
@@ -216,26 +205,27 @@ export default function InvoicesPage() {
             </div>
           </div>
           <div style="margin-top:20px">
+            <p><strong>Tipe Tagihan:</strong> ${invoiceType}</p>
             <p><strong>Tanggal:</strong> ${date}</p>
             <p><strong>Jatuh Tempo:</strong> ${dueDate}</p>
           </div>
           <table class="details">
             <thead>
               <tr>
-                <th>Deskripsi Paket</th>
+                <th>Deskripsi Tagihan</th>
                 <th style="text-align:right">Total Tagihan</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>Paket ${invoice.subscriptions?.subscription_plans?.name || "EA Robot"}</td>
+                <td>${invoiceType} - Paket ${invoice.subscriptions?.subscription_plans?.name || "EA Robot"}</td>
                 <td style="text-align:right">Rp ${amountIdr} ${amountUsd}</td>
               </tr>
             </tbody>
           </table>
           <div class="total">Total: Rp ${amountIdr}</div>
           <div class="footer">
-            <p>Pembayaran via transfer Bank BCA 2801365487 a/n Cecep Najmudin</p>
+            <p>Pembayaran via Payment Link</p>
             <p>Terima kasih telah menggunakan layanan ArchiTrade.</p>
           </div>
           <script>window.print();</script>
@@ -432,8 +422,27 @@ export default function InvoicesPage() {
                       {invoice.status === "pending" && (
                         <button
                           onClick={() => {
-                            setSelectedInvoice(invoice);
-                            setShowPaymentModal(true);
+                            const isProfitShare = !!invoice.profit_usd_ref;
+                            const invoiceType = isProfitShare ? "Bagi Hasil" : "Pembelian Lisensi";
+                            const packageName = invoice.subscriptions?.subscription_plans?.name || "EA Robot";
+                            const amount = Number(invoice.amount_idr || invoice.amount || 0).toLocaleString("id-ID");
+
+                            const msg = `Halo Admin ArchiTrade, saya ingin melakukan pembayaran tagihan.
+
+Berikut data saya:
+- Nama: ${profile?.full_name || "-"}
+- Email: ${user?.email || "-"}
+- No. Telp: ${profile?.phone || "-"}
+
+Detail Tagihan:
+- Tipe: ${invoiceType}
+- Paket: Paket ${packageName}
+- Total Bayar: Rp ${amount}
+
+Mohon kirimkan Payment Link untuk melanjutkan pembayaran. Terima kasih!`;
+
+                            const waUrl = `https://wa.me/6289617257030?text=${encodeURIComponent(msg)}`;
+                            window.open(waUrl, "_blank");
                           }}
                           className="flex-1 sm:flex-none bg-appPrimary hover:bg-appPrimary/90 text-black font-semibold px-6 py-3 rounded-2xl transition flex items-center justify-center gap-2"
                         >
@@ -469,113 +478,6 @@ export default function InvoicesPage() {
         </div>
       </div>
 
-      {/* PAYMENT MODAL */}
-      {showPaymentModal && selectedInvoice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-            onClick={() => !confirming && setShowPaymentModal(false)}
-          />
-          <div className="relative w-full max-w-md bg-[#12121a] border border-white/10 rounded-3xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300">
-            <div className="p-6 sm:p-8">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-amber-500/10 flex items-center justify-center">
-                    <CreditCard className="h-5 w-5 text-amber-400" />
-                  </div>
-                  <h3 className="text-xl font-bold">Instruksi Bayar</h3>
-                </div>
-                <button
-                  onClick={() => setShowPaymentModal(false)}
-                  className="p-2 hover:bg-white/5 rounded-xl transition"
-                >
-                  <XCard className="h-5 w-5 text-zinc-500" />
-                </button>
-              </div>
-
-              <div className="space-y-6">
-                <div className="p-5 rounded-2xl bg-white/3 border border-white/5 space-y-4">
-                  <div>
-                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold mb-1">
-                      Total Transfer
-                    </p>
-                    <p className="text-2xl font-extrabold text-appPrimary">
-                      Rp{" "}
-                      {Number(
-                        selectedInvoice.amount_idr ||
-                          selectedInvoice.amount ||
-                          0,
-                      ).toLocaleString("id-ID")}
-                    </p>
-                  </div>
-
-                  <div className="pt-4 border-t border-white/5 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-zinc-400">Bank</span>
-                      <span className="text-xs font-bold text-white">BCA</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-zinc-400">
-                        No. Rekening
-                      </span>
-                      <span className="text-xs font-bold text-white tracking-wider">
-                        2801365487
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-zinc-400">Atas Nama</span>
-                      <span className="text-xs font-bold text-white">
-                        Cecep Najmudin
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-amber-500/5 border border-amber-500/10 rounded-xl p-4 flex gap-3">
-                  <AlertTriangle className="h-5 w-5 text-amber-400 shrink-0" />
-                  <p className="text-[11px] text-amber-400/80 leading-relaxed">
-                    Pastikan nominal transfer sesuai dengan tagihan. Setelah
-                    transfer, klik tombol di bawah untuk konfirmasi. Admin akan
-                    memverifikasi dalam 1x24 jam.
-                  </p>
-                </div>
-
-                <button
-                  onClick={handleConfirmPayment}
-                  disabled={confirming}
-                  className="w-full py-4 bg-appPrimary hover:bg-appPrimary/90 text-black font-bold rounded-2xl transition flex items-center justify-center gap-2 disabled:opacity-50"
-                >
-                  {confirming ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : (
-                    <CheckCircle className="h-5 w-5" />
-                  )}
-                  Konfirmasi Saya Sudah Bayar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
-
-// Helper to avoid build error if Lucide names differ slightly
-const XCard = (props: any) => (
-  <svg
-    {...props}
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M18 6 6 18" />
-    <path d="m6 6 12 12" />
-  </svg>
-);

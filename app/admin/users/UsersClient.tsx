@@ -57,16 +57,20 @@ export function UsersClient({ initialUsers }: UsersClientProps) {
     setUpdating(true);
 
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
+      const res = await fetch("/api/admin/users/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: selectedUser.id,
           full_name: editForm.full_name,
           phone: editForm.phone,
           role: editForm.role,
-        })
-        .eq("id", selectedUser.id);
+        }),
+      });
 
-      if (error) throw error;
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Gagal mengupdate user");
+
 
       setUsers(users.map(u => u.id === selectedUser.id ? { ...u, ...editForm } as UserProfile : u));
       setShowEditModal(false);
@@ -84,12 +88,14 @@ export function UsersClient({ initialUsers }: UsersClientProps) {
     }
 
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .delete()
-        .eq("id", userId);
+      const response = await fetch("/api/admin/users/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
 
-      if (error) throw error;
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Gagal menghapus user");
 
       setUsers(users.filter(u => u.id !== userId));
       toast.success("User successfully deleted");

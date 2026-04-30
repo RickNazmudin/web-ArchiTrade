@@ -16,6 +16,8 @@ export const metadata = {
     "ArchiTrade adalah komunitas trader yang berbagi pengetahuan dan wawasan mereka tentang strategi trading, analisis pasar, dan peluang investasi.",
 };
 
+import QueryProvider from "@/components/QueryProvider";
+
 export default function RootLayout({
   children,
 }: {
@@ -31,7 +33,9 @@ export default function RootLayout({
       >
         <div className="grain"></div>
         <div className="flex flex-col min-h-screen">
-          <main className="flex-1">{children}</main>
+          <QueryProvider>
+            <main className="flex-1">{children}</main>
+          </QueryProvider>
           <Footer />
         </div>
         <Toaster

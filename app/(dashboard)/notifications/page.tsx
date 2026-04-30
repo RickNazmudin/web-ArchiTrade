@@ -272,7 +272,20 @@ export default function UserNotificationsPage() {
               return (
                 <div
                   key={notif.id}
-                  onClick={() => !notif.is_read && markAsRead(notif.id)}
+                  onClick={() => {
+                    if (!notif.is_read) markAsRead(notif.id);
+                    
+                    if (
+                      notif.title?.toLowerCase().includes("tagihan") ||
+                      notif.title?.toLowerCase().includes("invoice") ||
+                      notif.title?.toLowerCase().includes("pembayaran") ||
+                      notif.title?.toLowerCase().includes("bagi hasil") ||
+                      notif.message?.toLowerCase().includes("tagihan") ||
+                      notif.message?.toLowerCase().includes("invoice")
+                    ) {
+                      router.push("/invoices");
+                    }
+                  }}
                   className={`group rounded-2xl bg-[#0d0d14] border border-white/5 overflow-hidden hover:border-white/10 transition-all duration-300 hover:shadow-xl cursor-pointer ${
                     !notif.is_read ? "ring-1 ring-violet-500/20" : ""
                   }`}

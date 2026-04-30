@@ -111,64 +111,55 @@ export default function AdminProfitsPage() {
   const loadUsersWithSubs = async () => {
     setLoading(true);
     try {
-      // Fetch users and their active subscriptions
       const { data: profiles, error: pError } = await supabase
         .from("profiles")
-        .select(`
-          id, 
-          full_name, 
-          email, 
-          phone
-        `)
-        .eq("role", "customer")
-        .order("full_name");
-
+        .select("id, full_name, email, phone")
+        .eq("role", "customer");
+        
       if (pError) throw pError;
 
-      // Fetch active subscriptions
-      let { data: subs, error: sError } = await supabase
+      const { data: subs, error: sError } = await supabase
         .from("subscriptions")
-        .select("*, subscription_plans!fk_subscriptions_plans(*)")
-        .eq("status", "active");
-
-      // Manual Linker Fallback (Safety Buffer)
-      if (sError) {
-        // Try the other common constraint name just in case
-        const { data: subsRetry, error: sRetryError } = await supabase
-          .from("subscriptions")
-          .select("*, subscription_plans!subscriptions_plan_id_fkey(*)")
-          .eq("status", "active");
+        .select("*")
+        .order("created_at", { ascending: false });
         
-        if (!sRetryError) {
-          subs = subsRetry;
-        } else {
-          console.warn("Both join hints failed, using manual fallback");
-          const { data: rawSubs } = await supabase
-            .from("subscriptions")
-            .select("*")
-            .eq("status", "active");
-          
-          if (rawSubs) {
-            const { data: plans } = await supabase
-              .from("subscription_plans")
-              .select("*");
-            
-            subs = rawSubs.map(s => ({
-              ...s,
-              subscription_plans: plans?.find(p => p.id === s.plan_id) || null
-            }));
+      if (sError) throw sError;
+
+      const { data: mt5Accounts, error: mError } = await supabase
+        .from("mt5_accounts")
+        .select("id, mt5_id, mt5_server");
+        
+      if (mError) throw mError;
+
+      const { data: plans, error: plError } = await supabase
+        .from("subscription_plans")
+        .select("*");
+        
+      if (plError) throw plError;
+
+      const mappedItems = (subs || []).map(sub => {
+        const profile = profiles?.find(p => p.id === sub.user_id);
+        const mt5 = mt5Accounts?.find(m => m.id === sub.mt5_account_id);
+        const plan = plans?.find(p => p.id === sub.plan_id);
+        
+        return {
+          id: profile?.id || sub.user_id, 
+          full_name: profile?.full_name || "Unknown User",
+          email: profile?.email || "",
+          phone: profile?.phone || "",
+          mt5_id: mt5?.mt5_id || "No MT5 ID",
+          mt5_server: mt5?.mt5_server || "No Server",
+          subscription_id: sub.id,
+          subscription: {
+            ...sub,
+            subscription_plans: plan || null
           }
-        }
-      }
+        };
+      });
 
-      const mappedUsers = profiles.map(p => ({
-        ...p,
-        subscription: subs?.find(s => s.user_id === p.id) || null
-      }));
-
-      setUsers(mappedUsers);
+      setUsers(mappedItems);
     } catch (err: any) {
-      toast.error("Gagal memuat data user: " + err.message);
+      toast.error("Gagal memuat data: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -195,44 +186,35 @@ export default function AdminProfitsPage() {
 
     setGenerating(true);
     try {
-      // 1. Create Invoice
-      const { data: invoice, error: invError } = await supabase
-        .from("invoices")
-        .insert({
+      const notifMsg = `Tagihan bagi hasil profit bulan ${selectedMonth}/${selectedYear} telah terbit sebesar $${calc.amountUsd.toFixed(2)} (Rp ${calc.amountIdr.toLocaleString("id-ID")}). Silakan cek menu tagihan.`;
+
+      const res = await fetch("/api/admin/invoices/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           user_id: selectedUser.id,
           subscription_id: selectedUser.subscription.id,
-          amount: calc.amountIdr, // Legacy support
           amount_idr: calc.amountIdr,
           amount_usd: calc.amountUsd,
           profit_usd_ref: calc.profit,
-          status: "pending",
-          due_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days due
-          created_at: new Date().toISOString()
-        })
-        .select()
-        .single();
-
-      if (invError) throw invError;
-
-      // 2. Add Monthly Profit Record
-      await supabase.from("monthly_profits").insert({
-        user_id: selectedUser.id,
-        amount_usd: calc.profit,
-        month: selectedMonth,
-        year: selectedYear,
-        invoice_id: invoice.id
+          month: selectedMonth,
+          year: selectedYear,
+          message: notifMsg,
+          email: selectedUser.email
+        }),
       });
 
-      // 3. Send Notifications
-      const notifMsg = `Tagihan bagi hasil profit bulan ${selectedMonth}/${selectedYear} telah terbit sebesar $${calc.amountUsd.toFixed(2)} (Rp ${calc.amountIdr.toLocaleString("id-ID")}). Silakan cek menu tagihan.`;
-      
-      await notificationService.sendAll({
-        userId: selectedUser.id,
-        title: "Tagihan Profit-Share Baru",
-        message: notifMsg,
-        type: "info",
-        email: selectedUser.email
-      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Gagal membuat tagihan");
+
+      if (selectedUser.email) {
+        await notificationService.sendEmail({
+          userId: selectedUser.id,
+          title: "Tagihan Profit-Share Baru",
+          message: notifMsg,
+          email: selectedUser.email
+        });
+      }
 
       toast.success("Invoice berhasil dibuat & Notifikasi dikirim!");
       
@@ -248,7 +230,8 @@ export default function AdminProfitsPage() {
 
   const filteredUsers = users.filter(u => 
     u.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    u.mt5_id?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const months = [
@@ -299,39 +282,46 @@ export default function AdminProfitsPage() {
                     Belum ada user dengan lisensi aktif
                   </div>
                 ) : (
-                  filteredUsers.map(u => (
-                    <button
-                      key={u.id}
-                      onClick={() => setSelectedUser(u)}
-                      className={`w-full flex items-center justify-between p-4 rounded-xl transition border ${
-                        selectedUser?.id === u.id 
-                          ? "bg-appPrimary/10 border-appPrimary" 
-                          : "bg-zinc-800/50 border-zinc-700 hover:border-zinc-500"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 text-left">
-                        <div className="w-10 h-10 rounded-full bg-zinc-700 flex items-center justify-center text-white font-bold">
-                          {u.full_name?.[0]?.toUpperCase()}
+                  filteredUsers.map(u => {
+                    const isActive = u.subscription?.status === "active";
+                    return (
+                      <button
+                        key={u.subscription_id}
+                        disabled={!isActive}
+                        onClick={() => setSelectedUser(u)}
+                        className={`w-full flex items-center justify-between p-4 rounded-xl transition border ${
+                          !isActive
+                            ? "bg-zinc-900/30 border-zinc-800/50 opacity-50 cursor-not-allowed"
+                            : selectedUser?.subscription_id === u.subscription_id
+                              ? "bg-appPrimary/10 border-appPrimary"
+                              : "bg-zinc-800/50 border-zinc-700 hover:border-zinc-500"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 text-left">
+                          <div className="w-10 h-10 rounded-full bg-zinc-700 flex items-center justify-center text-white font-bold">
+                            {u.full_name?.[0]?.toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="text-white font-semibold">{u.full_name}</p>
+                            <p className="text-xs text-gray-400 font-mono mt-0.5">ID: {u.mt5_id}</p>
+                            <p className="text-[10px] text-gray-500 font-mono">Srv: {u.mt5_server}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-white font-semibold">{u.full_name}</p>
-                          <p className="text-xs text-gray-400">{u.email}</p>
+                        <div className="text-right">
+                          {isActive ? (
+                            <span className="text-[10px] px-2 py-0.5 bg-appPrimary/20 text-appPrimary rounded-full uppercase font-bold">
+                              {u.subscription.subscription_plans?.name} ({u.subscription.subscription_plans?.share_profit_percent}%)
+                            </span>
+                          ) : (
+                            <span className="text-[10px] px-2 py-0.5 bg-red-500/20 text-red-400 rounded-full uppercase font-bold text-center block">
+                              Tidak Aktif ({u.subscription?.status})
+                            </span>
+                          )}
+                          <ArrowRight className={`w-4 h-4 mt-1 ml-auto ${selectedUser?.subscription_id === u.subscription_id ? "text-appPrimary" : "text-gray-600"}`} />
                         </div>
-                      </div>
-                      <div className="text-right">
-                        {u.subscription ? (
-                          <span className="text-[10px] px-2 py-0.5 bg-appPrimary/20 text-appPrimary rounded-full uppercase font-bold">
-                            {u.subscription.subscription_plans?.name} ({u.subscription.subscription_plans?.share_profit_percent}%)
-                          </span>
-                        ) : (
-                          <span className="text-[10px] px-2 py-0.5 bg-red-500/20 text-red-400 rounded-full uppercase font-bold text-center block">
-                            No License
-                          </span>
-                        )}
-                        <ArrowRight className={`w-4 h-4 mt-1 ml-auto ${selectedUser?.id === u.id ? "text-appPrimary" : "text-gray-600"}`} />
-                      </div>
-                    </button>
-                  ))
+                      </button>
+                    )
+                  })
                 )}
               </div>
             </div>

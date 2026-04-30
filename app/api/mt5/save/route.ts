@@ -3,10 +3,11 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { encrypt } from "@/lib/encryption";
 import { z } from "zod";
+import { createSupabaseAdmin } from "@/lib/supabase/server";
 
 // Skema validasi untuk input MT5
 const mt5Schema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().uuid().optional().nullable(),
   mt5_id: z.string().min(3, "ID MT5 terlalu pendek").max(50),
   mt5_password: z.string().min(1, "Password diperlukan").optional().or(z.literal("")),
   mt5_server: z.string().min(3, "Nama server tidak valid"),
@@ -42,6 +43,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const adminClient = createSupabaseAdmin();
+    const db = adminClient || supabase;
+
     const body = await request.json();
     
     // Validasi dengan Zod
@@ -57,7 +61,7 @@ export async function POST(request: Request) {
 
     if (id) {
       // MODE EDIT: Update akun spesifik berdasarkan ID
-      const { data: existingAccount, error: fetchError } = await supabase
+      const { data: existingAccount, error: fetchError } = await db
         .from("mt5_accounts")
         .select("id, mt5_password")
         .eq("id", id)
@@ -73,7 +77,7 @@ export async function POST(request: Request) {
         encryptedPassword = `encrypted:${encrypt(mt5_password)}`;
       }
 
-      const { error: updateError } = await supabase
+      const { error: updateError } = await db
         .from("mt5_accounts")
         .update({
           mt5_id,
@@ -88,7 +92,7 @@ export async function POST(request: Request) {
       // MODE BARU: Insert akun baru
       
       // 1. Cek limit (max 5)
-      const { count, error: countError } = await supabase
+      const { count, error: countError } = await db
         .from("mt5_accounts")
         .select("*", { count: "exact", head: true })
         .eq("user_id", user.id);
@@ -103,7 +107,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Password MT5 diperlukan untuk akun baru" }, { status: 400 });
       }
       
-      const { error: insertError } = await supabase
+      const { error: insertError } = await db
         .from("mt5_accounts")
         .insert({
           user_id: user.id,

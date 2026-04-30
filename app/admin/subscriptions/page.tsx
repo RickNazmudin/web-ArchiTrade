@@ -150,13 +150,21 @@ export default function AdminSubscriptionsPage() {
   };
 
   const updateStatus = async (id: string, newStatus: string) => {
-    const { error } = await supabase
-      .from("subscriptions")
-      .update({ status: newStatus })
-      .eq("id", id);
+    try {
+      const res = await fetch("/api/admin/subscriptions/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status: newStatus }),
+      });
 
-    if (!error) {
-      await loadData();
+      if (res.ok) {
+        await loadData();
+      } else {
+        const data = await res.json();
+        console.error("Gagal mengupdate status:", data.error);
+      }
+    } catch (err: any) {
+      console.error("Error updating status:", err.message);
     }
   };
 
