@@ -1,7 +1,7 @@
 "use client";
 import { ReactLenis } from "lenis/react";
+import { useState, useEffect, useRef } from "react";
 import { useTransform, motion, useScroll, MotionValue } from "framer-motion";
-import { useRef } from "react";
 import Image from "next/image";
 import { BorderBeam } from "./border-beam";
 
@@ -78,51 +78,73 @@ const projects = [
   },
 ];
 
+
+
 export default function CardScroll(): JSX.Element {
   const container = useRef(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const { scrollYProgress } = useScroll({
     target: container,
     offset: ["start start", "end end"],
   });
 
+  const content = (
+    <main className="" ref={container}>
+      <section className="text-white h-auto py-10 md:py-20 lg:py-32 w-full grid place-content-center relative px-4">
+        <h1 className="text-2xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl px-2 md:px-8 font-semibold text-center tracking-tight leading-[120%]">
+          Beberapa Layanan 
+          <span className="text-appPrimary"> yang Kami Sediakan</span>
+        </h1>
+        <br />
+        <div className="px-2 md:px-8 flex justify-center">
+          <p className="text-sm md:text-lg lg:text-xl font-light max-w-4xl text-center leading-relaxed">
+          Di ArchiTrade, kami berkomitmen untuk menjadi mitra terpercaya Anda dalam perjalanan trading dan investasi. 
+          Kami menyediakan berbagai layanan esensial yang dirancang untuk membekali Anda dengan pengetahuan, wawasan, 
+          dan dukungan komunitas yang Anda butuhkan untuk sukses di pasar keuangan.
+          </p>
+        </div>
+      </section>
+
+      <section className="text-white w-full">
+        {projects.map((project, i) => {
+          const targetScale = 1 - (projects.length - i) * 0.05;
+          return (
+            <Card
+              key={`p_${i}`}
+              i={i}
+              url={project.link}
+              src={project.src}
+              title={project.title}
+              color={project.color}
+              description={project.description}
+              progress={scrollYProgress}
+              range={[i * 0.25, 1]}
+              targetScale={targetScale}
+              isMobile={isMobile}
+            />
+          );
+        })}
+      </section>
+    </main>
+  );
+
+  if (isMobile) {
+    return content;
+  }
+
   return (
     <ReactLenis root>
-      <main className="" ref={container}>
-        <section className="text-white h-auto py-10 md:py-20 lg:py-32 w-full grid place-content-center relative px-4">
-          <h1 className="text-2xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl px-2 md:px-8 font-semibold text-center tracking-tight leading-[120%]">
-            Beberapa Layanan 
-            <span className="text-appPrimary"> yang Kami Sediakan</span>
-          </h1>
-          <br />
-          <div className="px-2 md:px-8 flex justify-center">
-            <p className="text-sm md:text-lg lg:text-xl font-light max-w-4xl text-center leading-relaxed">
-            Di ArchiTrade, kami berkomitmen untuk menjadi mitra terpercaya Anda dalam perjalanan trading dan investasi. 
-            Kami menyediakan berbagai layanan esensial yang dirancang untuk membekali Anda dengan pengetahuan, wawasan, 
-            dan dukungan komunitas yang Anda butuhkan untuk sukses di pasar keuangan.
-            </p>
-          </div>
-        </section>
-
-        <section className="text-white w-full">
-          {projects.map((project, i) => {
-            const targetScale = 1 - (projects.length - i) * 0.05;
-            return (
-              <Card
-                key={`p_${i}`}
-                i={i}
-                url={project.link}
-                src={project.src}
-                title={project.title}
-                color={project.color}
-                description={project.description}
-                progress={scrollYProgress}
-                range={[i * 0.25, 1]}
-                targetScale={targetScale}
-              />
-            );
-          })}
-        </section>
-      </main>
+      {content}
     </ReactLenis>
   );
 }
@@ -137,6 +159,7 @@ interface CardProps {
   progress: MotionValue<number>;
   range: [number, number];
   targetScale: number;
+  isMobile?: boolean;
 }
 
 const Card: React.FC<CardProps> = ({
@@ -147,6 +170,7 @@ const Card: React.FC<CardProps> = ({
   progress,
   range,
   targetScale,
+  isMobile,
 }) => {
   const container = useRef(null);
   const { scrollYProgress } = useScroll({
@@ -157,16 +181,18 @@ const Card: React.FC<CardProps> = ({
   const imageScale = useTransform(scrollYProgress, [0, 1], [2, 1]);
   const scale = useTransform(progress, range, [1, targetScale]);
 
+  // Simplify for mobile to reduce CPU usage
+  const cardStyle = isMobile 
+    ? { top: `calc(${i * 15}px)` } 
+    : { scale, top: `calc(${i * 15}px)` };
+
   return (
     <div
       ref={container}
       className="min-h-screen flex items-center justify-center sticky top-0 px-4 py-8 md:py-0"
     >
       <motion.div
-        style={{
-          scale,
-          top: `calc(${i * 15}px)`, // Reduced stacking offset for mobile
-        }}
+        style={cardStyle}
         className="flex flex-col relative w-full max-w-6xl mx-auto
                    h-auto min-h-[500px] md:min-h-[450px] lg:h-[500px]
                    bg-zinc-950 border-white/5 border rounded-lg 

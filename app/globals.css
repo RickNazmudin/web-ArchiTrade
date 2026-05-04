@@ -72,9 +72,15 @@
 @layer components {
   .glass-card {
     background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(12px);
+    backdrop-filter: none;
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+  
+  @media (min-width: 768px) {
+    .glass-card {
+      backdrop-filter: blur(12px);
+    }
   }
   
   .text-gradient-gold {

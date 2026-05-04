@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useMemo } from "react";
+import React, { useRef, useMemo, useState, useEffect } from "react";
 import DottedMap from "dotted-map";
 import { motion } from "framer-motion";
 import Image from "next/image";
@@ -15,23 +15,33 @@ interface MapProps {
 
 function WorldMapComponent({ dots = [], lineColor = "#0ea5e9" }: MapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // create DottedMap once per component instance
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // create DottedMap once per component instance, ultra simple for mobile
   const map = useMemo(
-    () => new DottedMap({ height: 100, grid: "diagonal" }),
-    []
+    () => new DottedMap({ height: isMobile ? 25 : 60, grid: "diagonal" }),
+    [isMobile]
   );
 
   // compute svg string once unless map changes
   const svgMap = useMemo(
     () =>
       map.getSVG({
-        radius: 0.22,
+        radius: isMobile ? 0.45 : 0.22,
         color: "rgb(255 255 255 / 0.1)",
         shape: "circle",
         backgroundColor: "black",
       }),
-    [map]
+    [map, isMobile]
   );
 
   const projectPoint = (lat: number, lng: number) => {
@@ -116,22 +126,26 @@ function WorldMapComponent({ dots = [], lineColor = "#0ea5e9" }: MapProps) {
                 fill={lineColor}
                 opacity="0.5"
               >
-                <animate
-                  attributeName="r"
-                  from="2"
-                  to="8"
-                  dur="1.5s"
-                  begin="0s"
-                  repeatCount="indefinite"
-                />
-                <animate
-                  attributeName="opacity"
-                  from="0.5"
-                  to="0"
-                  dur="1.5s"
-                  begin="0s"
-                  repeatCount="indefinite"
-                />
+                {!isMobile && (
+                  <animate
+                    attributeName="r"
+                    from="2"
+                    to="8"
+                    dur="1.5s"
+                    begin="0s"
+                    repeatCount="indefinite"
+                  />
+                )}
+                {!isMobile && (
+                  <animate
+                    attributeName="opacity"
+                    from="0.5"
+                    to="0"
+                    dur="1.5s"
+                    begin="0s"
+                    repeatCount="indefinite"
+                  />
+                )}
               </circle>
             </g>
             <g key={`end-${i}`}>
@@ -148,22 +162,26 @@ function WorldMapComponent({ dots = [], lineColor = "#0ea5e9" }: MapProps) {
                 fill={lineColor}
                 opacity="0.5"
               >
-                <animate
-                  attributeName="r"
-                  from="2"
-                  to="8"
-                  dur="1.5s"
-                  begin="0s"
-                  repeatCount="indefinite"
-                />
-                <animate
-                  attributeName="opacity"
-                  from="0.5"
-                  to="0"
-                  dur="1.5s"
-                  begin="0s"
-                  repeatCount="indefinite"
-                />
+                {!isMobile && (
+                  <animate
+                    attributeName="r"
+                    from="2"
+                    to="8"
+                    dur="1.5s"
+                    begin="0s"
+                    repeatCount="indefinite"
+                  />
+                )}
+                {!isMobile && (
+                  <animate
+                    attributeName="opacity"
+                    from="0.5"
+                    to="0"
+                    dur="1.5s"
+                    begin="0s"
+                    repeatCount="indefinite"
+                  />
+                )}
               </circle>
             </g>
           </g>

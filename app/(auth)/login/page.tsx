@@ -152,16 +152,16 @@ export default function LoginPage() {
       className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden"
       style={{ backgroundColor: "#0a0a0f" }}
     >
-      {/* Background glow blobs */}
+      {/* Background glow blobs - Hidden on mobile for performance */}
       <div
-        className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none"
+        className="hidden md:block absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none"
         style={{
           background:
             "radial-gradient(circle, rgba(var(--color-appPrimary-rgb, 34,197,94),0.06) 0%, transparent 70%)",
         }}
       />
       <div
-        className="absolute bottom-[-20%] right-[-10%] w-[400px] h-[400px] rounded-full blur-[100px] pointer-events-none"
+        className="hidden md:block absolute bottom-[-20%] right-[-10%] w-[400px] h-[400px] rounded-full blur-[100px] pointer-events-none"
         style={{
           background:
             "radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 70%)",
@@ -193,11 +193,10 @@ export default function LoginPage() {
 
         {/* Card */}
         <div
-          className="rounded-2xl p-7 sm:p-8"
+          className="rounded-2xl p-7 sm:p-8 backdrop-blur-[12px] md:backdrop-blur-[20px]"
           style={{
             background: "rgba(13,13,20,0.85)",
             border: "1px solid rgba(255,255,255,0.07)",
-            backdropFilter: "blur(20px)",
             boxShadow:
               "0 0 0 1px rgba(255,255,255,0.03), 0 32px 64px rgba(0,0,0,0.5)",
           }}

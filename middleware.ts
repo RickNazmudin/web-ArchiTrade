@@ -33,10 +33,6 @@ export async function middleware(request: NextRequest) {
       },
     );
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
     const pathname = request.nextUrl.pathname;
 
     const isProtectedRoute = 
@@ -48,10 +44,26 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith("/notifications") ||
       pathname.startsWith("/support");
 
-    if (isProtectedRoute && !user) {
-      const url = new URL("/login", request.url);
-      url.searchParams.set("next", pathname);
-      return NextResponse.redirect(url);
+    const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register");
+
+    // Only call getUser if it's a protected route or an auth page (to redirect if already logged in)
+    if (isProtectedRoute || isAuthPage) {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (isProtectedRoute && !user) {
+        const url = new URL("/login", request.url);
+        url.searchParams.set("next", pathname);
+        return NextResponse.redirect(url);
+      }
+
+      if (isAuthPage && user) {
+        // Redirect to dashboard if trying to access login/register while logged in
+        const profile = await supabase.from("profiles").select("role").eq("id", user.id).single();
+        const target = profile.data?.role === "admin" ? "/admin" : "/dashboard";
+        return NextResponse.redirect(new URL(target, request.url));
+      }
     }
 
     return response;

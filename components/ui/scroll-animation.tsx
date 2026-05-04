@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ReactNode } from "react";
+import { ReactNode, useState, useEffect } from "react";
 
 interface ScrollAnimationProps {
   children: ReactNode;
@@ -18,6 +18,17 @@ export default function ScrollAnimation({
   duration = 0.5,
   className = "",
 }: ScrollAnimationProps) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const variants = {
     hidden: {
       opacity: 0,
@@ -31,12 +42,16 @@ export default function ScrollAnimation({
     },
   };
 
+  if (isMobile) {
+    return <div className={className}>{children}</div>;
+  }
+
   return (
     <motion.div
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration, delay, ease: "easeOut" }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.3, delay, ease: "easeOut" }}
       variants={variants}
       className={className}
     >

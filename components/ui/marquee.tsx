@@ -1,4 +1,6 @@
-import React, { ComponentPropsWithoutRef } from "react";
+"use client";
+
+import React, { ComponentPropsWithoutRef, useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 interface MarqueeProps extends ComponentPropsWithoutRef<"div"> {
@@ -38,9 +40,20 @@ function Marquee({
   pauseOnHover = false,
   children,
   vertical = false,
-  repeat = 4,
+  repeat = 2,
   ...props
 }: MarqueeProps) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   return (
     <div
       {...props}
@@ -53,14 +66,16 @@ function Marquee({
         className
       )}
     >
-      {Array(repeat)
+      {Array(isMobile ? 1 : repeat)
         .fill(0)
         .map((_, i) => (
           <div
             key={i}
             className={cn("flex shrink-0 justify-around [gap:var(--gap)]", {
-              "animate-marquee flex-row": !vertical,
-              "animate-marquee-vertical flex-col": vertical,
+              "animate-marquee flex-row": !vertical && !isMobile,
+              "animate-marquee-vertical flex-col": vertical && !isMobile,
+              "flex-row": !vertical && isMobile,
+              "flex-col": vertical && isMobile,
               "group-hover:[animation-play-state:paused]": pauseOnHover,
               "[animation-direction:reverse]": reverse,
             })}

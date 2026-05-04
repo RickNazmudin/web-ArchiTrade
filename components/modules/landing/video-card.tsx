@@ -206,14 +206,14 @@ export function HeroVideoDialogDemo() {
   };
 
   return (
-    <div className="relative w-[80vw] mx-auto mt-20">
+    <div className="relative w-full max-w-7xl mx-auto mt-10 md:mt-20 px-4">
       {/* Bagian Broker Forex */}
-      <h1 className="text-5xl font-bold py-5 text-center mb-20">
+      <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold py-5 text-center mb-10 md:mb-20">
         <span className="text-appPrimary">Partner Resmi </span> Broker Forex
         Kami
       </h1>
 
-      <div className="flex flex-col items-center justify-center gap-8 p-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg mb-20">
+      <div className="flex flex-col items-center justify-center gap-8 p-4 md:p-8 bg-zinc-950 border border-white/5 rounded-2xl shadow-lg mb-16 md:mb-20">
         {/* Broker Selector */}
         <div className="flex space-x-4 mb-6">
           <button
@@ -313,12 +313,12 @@ export function HeroVideoDialogDemo() {
       </div>
 
       {/* Bagian Exchange Crypto */}
-      <h1 className="text-5xl font-bold py-5 text-center mb-20">
+      <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold py-5 text-center mb-10 md:mb-20">
         <span className="text-appPrimary">Partner Resmi </span> Exchange Crypto
         Kami
       </h1>
 
-      <div className="flex flex-col items-center justify-center gap-8 p-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
+      <div className="flex flex-col items-center justify-center gap-8 p-4 md:p-8 bg-zinc-950 border border-white/5 rounded-2xl shadow-lg">
         {/* Exchange Selector */}
         <div className="flex space-x-4 mb-6">
           <button
