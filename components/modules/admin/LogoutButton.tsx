@@ -21,7 +21,7 @@ export function LogoutButton() {
       className="flex items-center gap-1.5 px-3 py-2 text-sm text-zinc-500 hover:text-red-400 hover:bg-red-500/6 rounded-xl transition"
     >
       <LogOut className="h-4 w-4" />
-      <span className="hidden sm:inline">Keluar</span>
+      <span>Keluar</span>
     </button>
   );
 }

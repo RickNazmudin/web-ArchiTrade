@@ -231,7 +231,7 @@ export default function Header() {
                     className="flex items-center gap-1.5 px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg text-sm font-medium transition"
                   >
                     <LogOut className="w-4 h-4" />
-                    Logout
+                    Keluar
                   </button>
                 </div>
               ) : (
@@ -331,7 +331,7 @@ export default function Header() {
                   onClick={handleLogout}
                   className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-zinc-800 text-lg text-red-400 w-full text-left"
                 >
-                  <LogOut className="w-5 h-5" /> Logout
+                  <LogOut className="w-5 h-5" /> Keluar
                 </button>
               </>
             )}

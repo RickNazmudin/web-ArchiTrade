@@ -148,7 +148,7 @@ export default function DailyOutlookPage() {
 
         {/* ── EMPTY STATE ──────────────────────────────── */}
         {outlooks.length === 0 ? (
-          <div className="rounded-3xl bg-[#0d0d14] border border-white/5 p-16 flex flex-col items-center gap-4 text-center">
+          <div className="rounded-3xl bg-[#0d0d14] border border-white/5 p-8 sm:p-16 flex flex-col items-center gap-4 text-center">
             <div className="w-16 h-16 rounded-2xl bg-appPrimary/6 flex items-center justify-center">
               <Newspaper className="h-7 w-7 text-appPrimary/40" />
             </div>
@@ -268,8 +268,9 @@ function OutlookCard({
       {/* Image */}
       {outlook.image_url && (
         <div
-          className="relative overflow-hidden cursor-pointer"
-          style={{ height: featured ? "360px" : "240px" }}
+          className={`relative overflow-hidden cursor-pointer ${
+            featured ? "h-56 sm:h-72 md:h-96" : "h-48 sm:h-60"
+          }`}
           onClick={() => onImageClick(outlook.image_url, outlook.title)}
         >
           <img
@@ -278,37 +279,41 @@ function OutlookCard({
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
           {/* Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0d0d14] via-transparent to-transparent" />
-          {/* Zoom hint */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <div className="flex items-center gap-2 px-4 py-2.5 bg-black/60 backdrop-blur-md border border-white/20 rounded-full text-sm text-white">
-              <ZoomIn className="h-4 w-4" /> Lihat fullscreen
-            </div>
-          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0d0d14] via-transparent to-transparent opacity-60" />
+          
           {/* Date badge on image */}
-          <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 bg-black/60 backdrop-blur-md border border-white/10 rounded-full text-[11px] text-zinc-300">
+          <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1.5 bg-black/60 backdrop-blur-md border border-white/10 rounded-xl text-[10px] text-zinc-300">
             <Calendar className="h-3 w-3 text-appPrimary" />
             {formatDateShort(outlook.published_date)}
+          </div>
+
+          {/* Zoom hint - hidden on mobile for cleaner look */}
+          <div className="absolute inset-0 hidden sm:flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div className="flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur-md border border-white/20 rounded-full text-sm text-white">
+              <ZoomIn className="h-4 w-4" /> Lihat fullscreen
+            </div>
           </div>
         </div>
       )}
 
       {/* Content */}
-      <div className="p-5 sm:p-6">
+      <div className="p-4 sm:p-6">
         {/* Meta row */}
-        <div className="flex flex-wrap items-center gap-3 mb-3">
+        <div className="flex flex-wrap items-center gap-y-2 gap-x-4 mb-4">
           {!outlook.image_url && (
-            <div className="flex items-center gap-1.5 text-[11px] text-zinc-500">
+            <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-zinc-500">
               <Calendar className="h-3.5 w-3.5 text-appPrimary" />
               {formatDate(outlook.published_date)}
             </div>
           )}
-          <div className="flex items-center gap-1.5 text-[11px] text-zinc-500">
+          <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-zinc-500">
             <User className="h-3.5 w-3.5" />
-            {outlook.author || "Tim Analis ArchiTrade"}
+            <span className="truncate max-w-[120px] sm:max-w-none">
+              {outlook.author || "Tim Analis ArchiTrade"}
+            </span>
           </div>
           {featured && (
-            <span className="ml-auto text-[10px] px-2.5 py-1 bg-appPrimary/10 text-appPrimary rounded-full font-semibold uppercase tracking-wider">
+            <span className="text-[9px] sm:text-[10px] px-2 py-0.5 bg-appPrimary/10 text-appPrimary rounded-md font-bold uppercase tracking-wider">
               Terbaru
             </span>
           )}
@@ -316,7 +321,9 @@ function OutlookCard({
 
         {/* Title */}
         <h2
-          className={`font-bold text-white leading-snug mb-3 ${featured ? "text-xl sm:text-2xl" : "text-lg"}`}
+          className={`font-bold text-white leading-tight mb-3 group-hover:text-appPrimary transition-colors ${
+            featured ? "text-lg sm:text-2xl" : "text-base sm:text-lg"
+          }`}
         >
           {outlook.title}
         </h2>
@@ -325,7 +332,7 @@ function OutlookCard({
         <div className="relative">
           <p
             className={`text-zinc-400 text-sm leading-relaxed whitespace-pre-wrap transition-all ${
-              !expanded && isLong ? "line-clamp-4" : ""
+              !expanded && isLong ? "line-clamp-3 sm:line-clamp-4" : ""
             }`}
           >
             {outlook.content}
@@ -333,7 +340,7 @@ function OutlookCard({
 
           {/* Fade mask when collapsed */}
           {!expanded && isLong && (
-            <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#0d0d14] to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[#0d0d14] to-transparent" />
           )}
         </div>
 
@@ -341,7 +348,7 @@ function OutlookCard({
         {isLong && (
           <button
             onClick={() => setExpanded(!expanded)}
-            className="mt-3 text-sm text-appPrimary hover:text-appPrimary/80 transition font-medium flex items-center gap-1"
+            className="mt-4 text-xs sm:text-sm text-appPrimary hover:text-appPrimary/80 transition font-bold flex items-center gap-1 uppercase tracking-wider"
           >
             {expanded ? "Tampilkan lebih sedikit ↑" : "Baca selengkapnya ↓"}
           </button>
