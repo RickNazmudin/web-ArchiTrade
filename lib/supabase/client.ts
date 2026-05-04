@@ -5,12 +5,14 @@ export const createClient = () => {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    // Return a dummy client or handle appropriately in client components
-    console.error("Supabase environment variables are missing!");
+    // During build time, we might not have these variables.
+    // We log a warning but provide placeholders to prevent @supabase/ssr from crashing.
+    console.warn("Supabase environment variables are missing! Using placeholders for build time.");
+    return createBrowserClient(
+      supabaseUrl || "https://placeholder.supabase.co",
+      supabaseAnonKey || "placeholder",
+    );
   }
 
-  return createBrowserClient(
-    supabaseUrl || "",
-    supabaseAnonKey || "",
-  );
+  return createBrowserClient(supabaseUrl, supabaseAnonKey);
 };

@@ -6,7 +6,19 @@ export const createSupabaseServer = async () => {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error("Missing Supabase environment variables. Please check your .env file.");
+    // Return a dummy client during build to prevent crash
+    console.warn("Missing Supabase environment variables for server client. Using placeholders.");
+    const cookieStore = await cookies();
+    return createServerClient(
+      supabaseUrl || "https://placeholder.supabase.co",
+      supabaseAnonKey || "placeholder",
+      {
+        cookies: {
+          getAll() { return cookieStore.getAll(); },
+          setAll() { },
+        },
+      }
+    );
   }
 
   const cookieStore = await cookies();
