@@ -1277,16 +1277,17 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              <div className="rounded-2xl bg-[#0d0d14] border border-white/6 overflow-hidden">
+             <div className="rounded-2xl bg-[#0d0d14] border border-white/6 overflow-hidden">
                 <div className="px-5 py-4 border-b border-white/5 flex items-center gap-2">
                   <Video className="h-4 w-4 text-appPrimary" />
                   <h3 className="font-semibold text-sm">Video Tutorial</h3>
                 </div>
                 <div className="p-4 space-y-2">
                   {videoTutorials.map((v) => (
-                    <div
+                    <a
                       key={v.title}
-                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/3 transition group"
+                      href={v.link}
+                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/3 transition group cursor-pointer"
                     >
                       <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center flex-shrink-0">
                         <v.icon className="h-4 w-4 text-red-400" />
@@ -1299,8 +1300,8 @@ export default function DashboardPage() {
                           {v.duration}
                         </p>
                       </div>
-                      <ExternalLink className="h-4 w-4 text-zinc-600 group-hover:text-appPrimary transition cursor-pointer flex-shrink-0" />
-                    </div>
+                      <ExternalLink className="h-4 w-4 text-zinc-600 group-hover:text-appPrimary transition flex-shrink-0" />
+                    </a>
                   ))}
                 </div>
               </div>
