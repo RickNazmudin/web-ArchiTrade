@@ -308,15 +308,25 @@ export default function DashboardPage() {
       bg: "bg-rose-500/10",
     },
   ];
-
-  const videoTutorials = [
-    { title: "Daftar Broker Legal", duration: "15 menit", icon: Video },
+    const videoTutorials = [
     {
-      title: "Cara Baca Sinyal Trading",
-      duration: "20 menit",
-      icon: BarChart3,
+      title: "Daftar Broker Legal",
+      duration: "2 menit",
+      icon: Video,
+      link: "https://www.youtube.com/shorts/iCzNrL263mw",
     },
-    { title: "Optimasi Parameter EA", duration: "25 menit", icon: Settings },
+    {
+      title: "Cara Menikmati Layanan CopyTrade",
+      duration: "2 menit",
+      icon: BarChart3,
+      link: "https://www.youtube.com/shorts/gtNY0YB6Goc",
+    },
+    {
+      title: "Optimasi Parameter EA",
+      duration: "25 menit",
+      icon: Settings,
+      link: "https://www.youtube.com/@ArchiTrade99",
+    },
   ];
 
   const communityLinks = [
